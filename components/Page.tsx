@@ -14,6 +14,8 @@ export interface IPageProps {
 }
 
 type ClickEvent = React.MouseEvent<HTMLElement, MouseEvent>;
+type ChangeEvent = React.ChangeEvent<HTMLInputElement>;
+type EventHandler<T> = (e: T) => void;
 
 export default function Page(props: IPageProps) {
   const [title, setTitle] = useState('');
@@ -25,8 +27,10 @@ export default function Page(props: IPageProps) {
     setDescription('');
   };
 
-  const handleChangeTitleInput = e => setTitle(e.target.value);
-  const handleChangeDescriptionInput = e => setDescription(e.target.value);
+  const handleChangeTitleInput: EventHandler<ChangeEvent> = e =>
+    setTitle(e.target.value);
+  const handleChangeDescriptionInput: EventHandler<ChangeEvent> = e =>
+    setDescription(e.target.value);
 
   return (
     <div>

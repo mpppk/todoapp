@@ -5,12 +5,12 @@ import { IUser } from '../reducer';
 
 export const fromFirebaseUserToUser = (user: firebase.User): IUser => {
   return {
-    displayName: user.displayName,
-    email: user.email,
+    displayName: user.displayName ? user.displayName : undefined,
+    email: user.email ? user.email : undefined,
     emailVerified: user.emailVerified,
     isAnonymous: user.isAnonymous,
     phoneNumber: user.phoneNumber,
-    photoURL: user.photoURL,
+    photoURL: user.photoURL ? user.photoURL : undefined,
     uid: user.uid
   };
 };

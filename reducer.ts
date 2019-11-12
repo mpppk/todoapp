@@ -6,14 +6,14 @@ import { ITask } from './domain/todo';
 export const exampleInitialState = {
   isReadyFirebase: false,
   tasks: [] as ITask[],
-  user: (null as IUser) || null
+  user: null as IUser | null
 };
 
 export interface IUser {
-  displayName: string;
-  email: string;
+  displayName?: string;
+  email?: string;
   emailVerified: boolean;
-  photoURL: string;
+  photoURL?: string;
   isAnonymous: boolean;
   phoneNumber: string | null;
   uid: string;

@@ -9,15 +9,6 @@ import theme from '../src/theme';
 import createStore from '../store';
 
 class MyApp extends App {
-  public static async getInitialProps({ Component, ctx }) {
-    let pageProps = {};
-
-    if (Component.getInitialProps) {
-      pageProps = await Component.getInitialProps({ ctx });
-    }
-    return { pageProps };
-  }
-
   public render() {
     // @ts-ignore
     const { Component, pageProps, store } = this.props;

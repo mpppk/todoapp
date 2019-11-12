@@ -15,13 +15,7 @@ type IndexProps = {
   typeof todoActionCreators;
 
 class Index extends React.Component<IndexProps> {
-  // tslint:disable-next-line member-access
-  static async getInitialProps(props) {
-    const { isServer } = props.ctx;
-    return { isServer };
-  }
-
-  constructor(props) {
+  constructor(props: IndexProps) {
     super(props);
     this.handleClickLogout = this.handleClickLogout.bind(this);
   }
