@@ -1,13 +1,11 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import {
-  counterActionCreators,
-  counterAsyncActionCreators
-} from './actions/counter';
 import { sessionActionCreators } from './actions/session';
+import { todoActionCreators } from './actions/todo';
+import { ITask } from './domain/todo';
 
 export const exampleInitialState = {
-  count: 0,
   isReadyFirebase: false,
+  tasks: [] as ITask[],
   user: (null as IUser) || null
 };
 
@@ -23,10 +21,6 @@ export interface IUser {
 
 export type State = typeof exampleInitialState;
 
-const addCount = (state: State, amount: number) => {
-  return { ...state, count: state.count + amount };
-};
-
 const reducer = reducerWithInitialState(exampleInitialState)
   .case(sessionActionCreators.finishFirebaseInitializing, state => {
     return { ...state, isReadyFirebase: true };
@@ -34,17 +28,8 @@ const reducer = reducerWithInitialState(exampleInitialState)
   .case(sessionActionCreators.updateUser, (state, payload) => {
     return { ...state, user: payload.user };
   })
-  .case(counterActionCreators.clickIncrementButton, state => {
-    return addCount(state, 1);
-  })
-  .case(counterActionCreators.clickDecrementButton, state => {
-    return addCount(state, -1);
-  })
-  .case(
-    counterAsyncActionCreators.changeAmountWithSleep.done,
-    (state, payload) => {
-      return addCount(state, payload.result.amount);
-    }
-  );
+  .case(todoActionCreators.clickNewTaskButton, (state, task) => {
+    return { ...state, tasks: [...state.tasks, task] };
+  });
 
 export default reducer;

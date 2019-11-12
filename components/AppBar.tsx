@@ -54,7 +54,7 @@ export default function MyAppBar(props: IMyAppBarProps) {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" className={classes.title}>
-            Frontend boilerplate
+            TODO App
           </Typography>
           {props.user ? (
             <ProfileButton

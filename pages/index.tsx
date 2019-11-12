@@ -1,23 +1,23 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators, Dispatch } from 'redux';
-import { counterActionCreators } from '../actions/counter';
 import { sessionActionCreators } from '../actions/session';
-import { ICounterProps } from '../components/Counter';
+import { todoActionCreators } from '../actions/todo';
+import MyAppBar from '../components/AppBar';
 import Page from '../components/Page';
+import { ITask } from '../domain/todo';
 import { IUser, State } from '../reducer';
 
 type IndexProps = {
   user: IUser | null;
-} & ICounterProps &
-  typeof counterActionCreators &
-  typeof sessionActionCreators;
+  tasks: ITask[];
+} & typeof sessionActionCreators &
+  typeof todoActionCreators;
 
 class Index extends React.Component<IndexProps> {
   // tslint:disable-next-line member-access
   static async getInitialProps(props) {
-    const { store, isServer } = props.ctx;
-    store.dispatch(counterActionCreators.requestAmountChanging({ amount: 1 }));
+    const { isServer } = props.ctx;
     return { isServer };
   }
 
@@ -37,30 +37,32 @@ class Index extends React.Component<IndexProps> {
   // tslint:disable-next-line member-access
   render() {
     return (
-      <Page
-        user={this.props.user}
-        count={this.props.count}
-        title="Index Page"
-        onClickIncrementButton={this.props.clickIncrementButton}
-        onClickDecrementButton={this.props.clickDecrementButton}
-        onClickIncrementLaterButton={this.props.clickAsyncIncrementButton}
-        onClickLogout={this.handleClickLogout}
-      />
+      <div>
+        <MyAppBar
+          user={this.props.user}
+          onClickLogout={this.handleClickLogout}
+        />
+        <Page
+          user={this.props.user}
+          tasks={this.props.tasks}
+          onClickNewTaskButton={this.props.clickNewTaskButton}
+        />
+      </div>
     );
   }
 }
 
 const mapStateToProps = (state: State) => {
   return {
-    count: state.count,
+    tasks: state.tasks,
     user: state.user
   };
 };
 
 const mapDispatchToProps = (dispatch: Dispatch) => {
   return {
-    ...bindActionCreators({ ...counterActionCreators }, dispatch),
-    ...bindActionCreators({ ...sessionActionCreators }, dispatch)
+    ...bindActionCreators({ ...sessionActionCreators }, dispatch),
+    ...bindActionCreators({ ...todoActionCreators }, dispatch)
   };
 };
 

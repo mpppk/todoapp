@@ -1,28 +1,62 @@
-import Typography from '@material-ui/core/Typography/Typography';
+import { Button } from '@material-ui/core';
+import Paper from '@material-ui/core/Paper';
+import TextField from '@material-ui/core/TextField';
+import { useState } from 'react';
 import * as React from 'react';
+import { ITask } from '../domain/todo';
 import { IUser } from '../reducer';
-import MyAppBar from './AppBar';
-import Counter, { ICounterProps } from './Counter';
+import { Task } from './todo/Task';
 
-export type PageProps = {
-  title: string;
+export interface IPageProps {
+  tasks: ITask[];
   user: IUser | null;
-  onClickLogout: () => void;
-} & ICounterProps;
+  onClickNewTaskButton: (task: ITask) => void;
+}
 
-export default function Page(props: PageProps) {
+type ClickEvent = React.MouseEvent<HTMLElement, MouseEvent>;
+
+export default function Page(props: IPageProps) {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+
+  const handleClickNewTaskButton = (_e: ClickEvent) => {
+    props.onClickNewTaskButton({ title, description, isActive: true });
+    setTitle('');
+    setDescription('');
+  };
+
+  const handleChangeTitleInput = e => setTitle(e.target.value);
+  const handleChangeDescriptionInput = e => setDescription(e.target.value);
+
   return (
     <div>
-      <MyAppBar user={props.user} onClickLogout={props.onClickLogout} />
-      <Typography variant="h2" gutterBottom={true}>
-        {props.title}
-      </Typography>
-      <Counter
-        count={props.count}
-        onClickIncrementButton={props.onClickIncrementButton}
-        onClickDecrementButton={props.onClickDecrementButton}
-        onClickIncrementLaterButton={props.onClickIncrementLaterButton}
-      />
+      {props.tasks.map((t, i) => (
+        <Task
+          key={'task_' + i}
+          title={t.title}
+          description={t.description}
+          isActive={true}
+        />
+      ))}
+      <Paper>
+        <TextField
+          id="standard-basic"
+          label="Title"
+          margin="normal"
+          value={title}
+          onChange={handleChangeTitleInput}
+        />
+        <TextField
+          id="standard-basic"
+          label="Description"
+          margin="normal"
+          value={description}
+          onChange={handleChangeDescriptionInput}
+        />
+        <Button variant="outlined" onClick={handleClickNewTaskButton}>
+          Add
+        </Button>
+      </Paper>
     </div>
   );
 }
