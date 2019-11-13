@@ -1,34 +1,45 @@
-import Typography from '@material-ui/core/Typography/Typography';
 import { shallow } from 'enzyme';
 import * as React from 'react';
-import AppBar from '../../components/AppBar';
-import Counter from '../../components/Counter';
 import Page from '../../components/Page';
+import { Task } from '../../components/todo/Task';
+import { ITask } from '../../domain/todo';
 
 describe('Page', () => {
-  // tslint:disable-next-line no-empty
-  const emptyButtonHandler = (_nc: number) => {};
   // tslint:disable-next-line no-empty
   const emptyClickEventHandler = () => {};
 
   const wrapper = shallow(
     <Page
-      title="test"
-      count={0}
-      onClickIncrementButton={emptyButtonHandler}
-      onClickDecrementButton={emptyButtonHandler}
-      onClickIncrementLaterButton={emptyButtonHandler}
-      onClickLogout={emptyClickEventHandler}
       user={null}
+      onClickNewTaskButton={emptyClickEventHandler}
+      tasks={[]}
     />
   );
-  it('has 1 AppBar', async () => {
-    expect(wrapper.find(AppBar)).toHaveLength(1);
+  it('has no Task', async () => {
+    expect(wrapper.find(Task)).toHaveLength(0);
   });
-  it('has 1 Typography', async () => {
-    expect(wrapper.find(Typography)).toHaveLength(1);
-  });
-  it('has 1 Counter', async () => {
-    expect(wrapper.find(Counter)).toHaveLength(1);
+});
+
+describe('Page with task', () => {
+  // tslint:disable-next-line no-empty
+  const emptyClickEventHandler = () => {};
+
+  const tasks: ITask[] = [
+    {
+      description: 'description',
+      isActive: true,
+      title: 'title'
+    }
+  ];
+
+  const wrapper = shallow(
+    <Page
+      user={null}
+      onClickNewTaskButton={emptyClickEventHandler}
+      tasks={tasks}
+    />
+  );
+  it('has no Task', async () => {
+    expect(wrapper.find(Task)).toHaveLength(1);
   });
 });
