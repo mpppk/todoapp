@@ -17,7 +17,7 @@ const useStyles = makeStyles((_theme: Theme) => ({
 
 // tslint:disable-next-line variable-name
 export const SideList: React.FunctionComponent = () => {
-  const classes = useStyles();
+  const classes = useStyles(undefined);
 
   return (
     <div className={classes.list}>
