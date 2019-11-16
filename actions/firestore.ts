@@ -14,10 +14,10 @@ export const firestoreAsyncActionCreators = {
     TaskID,
     firebase.firestore.DocumentReference
   >('DELETE_TASKS'),
-  editTask: firestoreActionCreatorFactory.async<
+  modifyTask: firestoreActionCreatorFactory.async<
     ITask,
     firebase.firestore.DocumentReference
-  >('EDIT_TASKS')
+  >('MODIFY_TASKS')
 };
 
 export const firestoreActionCreators = {

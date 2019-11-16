@@ -71,8 +71,8 @@ function* watchAddTask() {
 }
 
 function* watchEditTask() {
-  const editTaskWorker = bindAsyncAction(
-    firestoreAsyncActionCreators.editTask,
+  const modifyTaskWorker = bindAsyncAction(
+    firestoreAsyncActionCreators.modifyTask,
     {
       skipStartedAction: true
     }
@@ -85,10 +85,10 @@ function* watchEditTask() {
   });
 
   function* worker(action: Action<ITask>) {
-    yield editTaskWorker(action.payload);
+    yield modifyTaskWorker(action.payload);
   }
 
-  yield takeEvery(firestoreAsyncActionCreators.editTask.started.type, worker);
+  yield takeEvery(firestoreAsyncActionCreators.modifyTask.started.type, worker);
 }
 
 function* watchDeleteTask() {

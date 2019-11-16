@@ -11,11 +11,11 @@ function* watchClickNewTaskButton() {
   yield takeEvery(todoActionCreators.clickNewTaskButton.type, worker);
 }
 
-function* watchClickEditTaskButton() {
+function* watchClickUpdateTaskButton() {
   function* worker(action: Action<ITask>) {
-    yield put(firestoreAsyncActionCreators.editTask.started(action.payload));
+    yield put(firestoreAsyncActionCreators.modifyTask.started(action.payload));
   }
-  yield takeEvery(todoActionCreators.clickEditTaskButton.type, worker);
+  yield takeEvery(todoActionCreators.clickUpdateTaskButton.type, worker);
 }
 
 function* watchClickDeleteTaskButton() {
@@ -27,6 +27,6 @@ function* watchClickDeleteTaskButton() {
 
 export const todoWatchers = [
   watchClickNewTaskButton(),
-  watchClickEditTaskButton(),
+  watchClickUpdateTaskButton(),
   watchClickDeleteTaskButton()
 ];
