@@ -7,14 +7,18 @@ import { ChangeEvent, ClickEvent, EventHandler } from '../core/events';
 import { ITask, ITaskDraft } from '../domain/todo';
 import { IUser } from '../reducer';
 import { Task } from './todo/Task';
+import { WritableTask } from './todo/WritableTask';
 
 export interface IPageProps {
+  editTaskId: string | null;
   tasks: ITask[];
   user: IUser | null;
   disableNewTaskButton: boolean;
-  onClickDeleteButton: (task: ITask) => void;
-  onClickEditButton: (task: ITask) => void;
+  onClickDeleteTaskButton: (task: ITask) => void;
+  onClickEditTaskButton: (task: ITask) => void;
   onClickNewTaskButton: (task: ITaskDraft) => void;
+  onClickCloseTaskButton: (task: ITask) => void;
+  onClickUpdateTaskButton: (task: ITask) => void;
 }
 
 export default function Page(props: IPageProps) {
@@ -34,17 +38,29 @@ export default function Page(props: IPageProps) {
 
   return (
     <div>
-      {props.tasks.map((t, i) => (
-        <Task
-          key={'task_' + i}
-          title={t.title}
-          description={t.description}
-          id={t.id}
-          isActive={true}
-          onClickDeleteButton={props.onClickDeleteButton}
-          onClickEditButton={props.onClickEditButton}
-        />
-      ))}
+      {props.tasks.map((t, i) =>
+        props.editTaskId === t.id ? (
+          <WritableTask
+            key={'writableTask_' + i}
+            id={t.id}
+            title={t.title}
+            description={t.description}
+            isActive={t.isActive}
+            onClickCloseButton={props.onClickCloseTaskButton}
+            onClickUpdateButton={props.onClickUpdateTaskButton}
+          />
+        ) : (
+          <Task
+            key={'task_' + i}
+            title={t.title}
+            description={t.description}
+            id={t.id}
+            isActive={t.isActive}
+            onClickDeleteButton={props.onClickDeleteTaskButton}
+            onClickEditButton={props.onClickEditTaskButton}
+          />
+        )
+      )}
       <Paper>
         <TextField
           id="standard-basic"

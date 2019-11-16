@@ -4,6 +4,9 @@ import { ITask, ITaskDraft } from '../domain/todo';
 const todoActionCreatorFactory = actionCreatorFactory('TODO');
 
 export const todoActionCreators = {
+  clickCloseTaskButton: todoActionCreatorFactory<ITask>(
+    'CLICK_CLOSE_TASK_BUTTON'
+  ),
   clickDeleteTaskButton: todoActionCreatorFactory<ITask>(
     'CLICK_DELETE_TASK_BUTTON'
   ),
@@ -12,5 +15,8 @@ export const todoActionCreators = {
   ),
   clickNewTaskButton: todoActionCreatorFactory<ITaskDraft>(
     'CLICK_NEW_TASK_BUTTON'
+  ),
+  clickUpdateTaskButton: todoActionCreatorFactory<ITask>(
+    'CLICK_UPDATE_TASK_BUTTON'
   )
 };

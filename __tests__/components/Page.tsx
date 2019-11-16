@@ -14,8 +14,8 @@ describe('Page', () => {
       onClickNewTaskButton={emptyClickEventHandler}
       tasks={[]}
       disableNewTaskButton={true}
-      onClickDeleteButton={emptyClickEventHandler}
-      onClickEditButton={emptyClickEventHandler}
+      onClickDeleteTaskButton={emptyClickEventHandler}
+      onClickEditTaskButton={emptyClickEventHandler}
     />
   );
   it('has no Task', async () => {
@@ -42,8 +42,8 @@ describe('Page with task', () => {
       onClickNewTaskButton={emptyClickEventHandler}
       tasks={tasks}
       disableNewTaskButton={true}
-      onClickDeleteButton={emptyClickEventHandler}
-      onClickEditButton={emptyClickEventHandler}
+      onClickDeleteTaskButton={emptyClickEventHandler}
+      onClickEditTaskButton={emptyClickEventHandler}
     />
   );
   it('has no Task', async () => {

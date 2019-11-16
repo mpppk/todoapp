@@ -10,12 +10,16 @@ import { State } from '../reducer';
 const useHandlers = () => {
   const dispatch = useDispatch();
   return {
+    clickCloseTaskButton: (task: ITask) =>
+      dispatch(todoActionCreators.clickCloseTaskButton(task)),
     clickDeleteTaskButton: (task: ITask) =>
       dispatch(todoActionCreators.clickDeleteTaskButton(task)),
     clickEditTaskButton: (task: ITask) =>
       dispatch(todoActionCreators.clickEditTaskButton(task)),
     clickNewTaskButton: (task: ITaskDraft) =>
       dispatch(todoActionCreators.clickNewTaskButton(task)),
+    clickUpdateTaskButton: (task: ITask) =>
+      dispatch(todoActionCreators.clickUpdateTaskButton(task)),
     requestToInitializeFirebase: () => {
       dispatch(sessionActionCreators.requestToInitializeFirebase());
     },
@@ -26,9 +30,10 @@ const useHandlers = () => {
 const useReduxState = () => {
   const user = useSelector((state: State) => state.user);
   const orgTasks = useSelector((state: State) => state.tasks);
+  const editTaskId = useSelector((state: State) => state.editTaskId);
   const tasks = orgTasks ? orgTasks : [];
 
-  return { user, tasks, disableNewTaskButton: !orgTasks };
+  return { user, tasks, editTaskId, disableNewTaskButton: !orgTasks };
 };
 
 export default () => {
@@ -41,12 +46,15 @@ export default () => {
     <div>
       <MyAppBar user={state.user} onClickLogout={handlers.requestToLogout} />
       <Page
+        editTaskId={state.editTaskId}
         user={state.user}
         tasks={state.tasks}
         disableNewTaskButton={state.disableNewTaskButton}
         onClickNewTaskButton={handlers.clickNewTaskButton}
-        onClickDeleteButton={handlers.clickDeleteTaskButton}
-        onClickEditButton={handlers.clickEditTaskButton}
+        onClickDeleteTaskButton={handlers.clickDeleteTaskButton}
+        onClickEditTaskButton={handlers.clickEditTaskButton}
+        onClickCloseTaskButton={handlers.clickCloseTaskButton}
+        onClickUpdateTaskButton={handlers.clickUpdateTaskButton}
       />
     </div>
   );
