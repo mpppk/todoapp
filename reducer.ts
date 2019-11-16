@@ -6,7 +6,7 @@ import { ITask } from './domain/todo';
 
 export const exampleInitialState = {
   isReadyFirebase: false,
-  tasks: [] as ITask[],
+  tasks: null as ITask[] | null,
   user: null as IUser | null
 };
 
@@ -33,7 +33,8 @@ const reducer = reducerWithInitialState(exampleInitialState)
     return { ...state, user: payload.user };
   })
   .case(todoActionCreators.clickNewTaskButton, (state, task) => {
-    return { ...state, tasks: [...state.tasks, task] };
+    const beforeTasks = state.tasks ? state.tasks : [];
+    return { ...state, tasks: [...beforeTasks, task] };
   });
 
 export default reducer;

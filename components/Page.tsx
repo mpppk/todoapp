@@ -10,6 +10,7 @@ import { Task } from './todo/Task';
 export interface IPageProps {
   tasks: ITask[];
   user: IUser | null;
+  disableNewTaskButton: boolean;
   onClickNewTaskButton: (task: ITask) => void;
 }
 
@@ -57,7 +58,11 @@ export default function Page(props: IPageProps) {
           value={description}
           onChange={handleChangeDescriptionInput}
         />
-        <Button variant="outlined" onClick={handleClickNewTaskButton}>
+        <Button
+          disabled={props.disableNewTaskButton}
+          variant="outlined"
+          onClick={handleClickNewTaskButton}
+        >
           Add
         </Button>
       </Paper>

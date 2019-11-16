@@ -18,11 +18,10 @@ const requestToGetTasksWorker = bindAsyncAction(
   );
 });
 
-function* worker(action: Action<IRequestToGetTasksPayload>) {
-  yield call(requestToGetTasksWorker, action.payload);
-}
-
 function* watchFinishFirebaseInitializing() {
+  function* worker(action: Action<IRequestToGetTasksPayload>) {
+    yield call(requestToGetTasksWorker, action.payload);
+  }
   yield takeEvery(
     sessionActionCreators.finishFirebaseInitializing.type,
     worker

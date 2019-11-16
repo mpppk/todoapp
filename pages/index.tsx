@@ -21,8 +21,10 @@ const useHandlers = () => {
 
 const useReduxState = () => {
   const user = useSelector((state: State) => state.user);
-  const tasks = useSelector((state: State) => state.tasks);
-  return { user, tasks };
+  const orgTasks = useSelector((state: State) => state.tasks);
+  const tasks = orgTasks ? orgTasks : [];
+
+  return { user, tasks, disableNewTaskButton: !orgTasks };
 };
 
 export default () => {
@@ -37,6 +39,7 @@ export default () => {
       <Page
         user={state.user}
         tasks={state.tasks}
+        disableNewTaskButton={state.disableNewTaskButton}
         onClickNewTaskButton={handlers.clickNewTaskButton}
       />
     </div>

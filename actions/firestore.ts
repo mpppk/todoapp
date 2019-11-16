@@ -14,8 +14,4 @@ export const firestoreAsyncActionCreators = {
   >('GET_TASKS')
 };
 
-export const firestoreActionCreators = {
-  requestToGetTasks: firestoreActionCreatorFactory<IRequestToGetTasksPayload>(
-    'REQUEST_TO_GET_TASKS'
-  )
-};
+export const firestoreActionCreators = {};
