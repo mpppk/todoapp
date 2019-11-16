@@ -1,11 +1,12 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
+import { firestoreAsyncActionCreators } from './actions/firestore';
 import { sessionActionCreators } from './actions/session';
 import { todoActionCreators } from './actions/todo';
 import { ITask } from './domain/todo';
 
 export const exampleInitialState = {
   isReadyFirebase: false,
-  tasks: [] as ITask[],
+  tasks: null as ITask[] | null,
   user: null as IUser | null
 };
 
@@ -22,6 +23,9 @@ export interface IUser {
 export type State = typeof exampleInitialState;
 
 const reducer = reducerWithInitialState(exampleInitialState)
+  .case(firestoreAsyncActionCreators.getTasks.done, (state, payload) => {
+    return { ...state, tasks: payload.result };
+  })
   .case(sessionActionCreators.finishFirebaseInitializing, state => {
     return { ...state, isReadyFirebase: true };
   })
@@ -29,7 +33,8 @@ const reducer = reducerWithInitialState(exampleInitialState)
     return { ...state, user: payload.user };
   })
   .case(todoActionCreators.clickNewTaskButton, (state, task) => {
-    return { ...state, tasks: [...state.tasks, task] };
+    const beforeTasks = state.tasks ? state.tasks : [];
+    return { ...state, tasks: [...beforeTasks, task] };
   });
 
 export default reducer;
