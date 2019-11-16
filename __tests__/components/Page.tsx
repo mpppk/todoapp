@@ -13,6 +13,7 @@ describe('Page', () => {
       user={null}
       onClickNewTaskButton={emptyClickEventHandler}
       tasks={[]}
+      disableNewTaskButton={true}
     />
   );
   it('has no Task', async () => {
@@ -37,6 +38,7 @@ describe('Page with task', () => {
       user={null}
       onClickNewTaskButton={emptyClickEventHandler}
       tasks={tasks}
+      disableNewTaskButton={true}
     />
   );
   it('has no Task', async () => {
