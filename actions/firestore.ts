@@ -1,15 +1,23 @@
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import actionCreatorFactory from 'typescript-fsa';
-import { ITask } from '../domain/todo';
+import { ITask, ITaskDraft, TaskID } from '../domain/todo';
 
 const firestoreActionCreatorFactory = actionCreatorFactory('FIRESTORE');
 
 export const firestoreAsyncActionCreators = {
   addTask: firestoreActionCreatorFactory.async<
+    ITaskDraft,
+    firebase.firestore.DocumentReference
+  >('ADD_TASKS'),
+  deleteTask: firestoreActionCreatorFactory.async<
+    TaskID,
+    firebase.firestore.DocumentReference
+  >('DELETE_TASKS'),
+  editTask: firestoreActionCreatorFactory.async<
     ITask,
     firebase.firestore.DocumentReference
-  >('ADD_TASKS')
+  >('EDIT_TASKS')
 };
 
 export const firestoreActionCreators = {

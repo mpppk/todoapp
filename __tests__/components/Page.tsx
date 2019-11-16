@@ -14,6 +14,8 @@ describe('Page', () => {
       onClickNewTaskButton={emptyClickEventHandler}
       tasks={[]}
       disableNewTaskButton={true}
+      onClickDeleteButton={emptyClickEventHandler}
+      onClickEditButton={emptyClickEventHandler}
     />
   );
   it('has no Task', async () => {
@@ -28,6 +30,7 @@ describe('Page with task', () => {
   const tasks: ITask[] = [
     {
       description: 'description',
+      id: 'id',
       isActive: true,
       title: 'title'
     }
@@ -39,6 +42,8 @@ describe('Page with task', () => {
       onClickNewTaskButton={emptyClickEventHandler}
       tasks={tasks}
       disableNewTaskButton={true}
+      onClickDeleteButton={emptyClickEventHandler}
+      onClickEditButton={emptyClickEventHandler}
     />
   );
   it('has no Task', async () => {

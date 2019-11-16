@@ -3,7 +3,8 @@ import Paper from '@material-ui/core/Paper';
 import TextField from '@material-ui/core/TextField';
 import { useState } from 'react';
 import * as React from 'react';
-import { ITask } from '../domain/todo';
+import { ChangeEvent, ClickEvent, EventHandler } from '../core/events';
+import { ITask, ITaskDraft } from '../domain/todo';
 import { IUser } from '../reducer';
 import { Task } from './todo/Task';
 
@@ -11,12 +12,10 @@ export interface IPageProps {
   tasks: ITask[];
   user: IUser | null;
   disableNewTaskButton: boolean;
-  onClickNewTaskButton: (task: ITask) => void;
+  onClickDeleteButton: (task: ITask) => void;
+  onClickEditButton: (task: ITask) => void;
+  onClickNewTaskButton: (task: ITaskDraft) => void;
 }
-
-type ClickEvent = React.MouseEvent<HTMLElement, MouseEvent>;
-type ChangeEvent = React.ChangeEvent<HTMLInputElement>;
-type EventHandler<T> = (e: T) => void;
 
 export default function Page(props: IPageProps) {
   const [title, setTitle] = useState('');
@@ -40,7 +39,10 @@ export default function Page(props: IPageProps) {
           key={'task_' + i}
           title={t.title}
           description={t.description}
+          id={t.id}
           isActive={true}
+          onClickDeleteButton={props.onClickDeleteButton}
+          onClickEditButton={props.onClickEditButton}
         />
       ))}
       <Paper>

@@ -26,6 +26,19 @@ const reducer = reducerWithInitialState(exampleInitialState)
     const beforeTasks = state.tasks ? state.tasks : [];
     return { ...state, tasks: [...beforeTasks, ...tasks] };
   })
+  .case(firestoreActionCreators.modifiedTasks, (state, tasks: ITask[]) => {
+    const beforeTasks = state.tasks ? state.tasks : [];
+    const newTasks = beforeTasks.map(beforeTask => {
+      const task = tasks.find(b => b.id === beforeTask.id);
+      return task ? task : beforeTask;
+    });
+    return { ...state, tasks: newTasks };
+  })
+  .case(firestoreActionCreators.removedTasks, (state, tasks: ITask[]) => {
+    const beforeTasks = state.tasks ? state.tasks : [];
+    const newTasks = beforeTasks.filter(bt => !tasks.find(t => bt.id === t.id));
+    return { ...state, tasks: newTasks };
+  })
   .case(sessionActionCreators.finishFirebaseInitializing, state => {
     return { ...state, isReadyFirebase: true };
   })
