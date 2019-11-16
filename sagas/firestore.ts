@@ -1,31 +1,71 @@
-import { call, takeEvery } from '@redux-saga/core/effects';
-import firebase from 'firebase';
+import { call, put, take, takeEvery } from '@redux-saga/core/effects';
+import * as firebase from 'firebase/app';
+import 'firebase/firestore';
+import { eventChannel } from 'redux-saga';
 import { Action } from 'typescript-fsa';
 import { bindAsyncAction } from 'typescript-fsa-redux-saga';
 import {
-  firestoreAsyncActionCreators,
-  IRequestToGetTasksPayload
+  firestoreActionCreators,
+  firestoreAsyncActionCreators
 } from '../actions/firestore';
-import { sessionActionCreators } from '../actions/session';
+import { ITask } from '../domain/todo';
 
-const requestToGetTasksWorker = bindAsyncAction(
-  firestoreAsyncActionCreators.getTasks
-)(function*(_params: IRequestToGetTasksPayload) {
-  const collection = firebase.firestore().collection('tasks');
-  const querySnapshot = yield call(collection.get.bind(collection));
-  return querySnapshot.docs.map((doc: firebase.firestore.DocumentSnapshot) =>
-    doc.data()
-  );
-});
+function* querySnapshotChannel(firestore: firebase.firestore.Firestore) {
+  return eventChannel(emit => {
+    const query = firestore.collection('tasks');
+    query.onSnapshot((snapshot: firebase.firestore.QuerySnapshot) => {
+      emit(snapshot.docChanges());
+    });
 
-function* watchFinishFirebaseInitializing() {
-  function* worker(action: Action<IRequestToGetTasksPayload>) {
-    yield call(requestToGetTasksWorker, action.payload);
-  }
-  yield takeEvery(
-    sessionActionCreators.finishFirebaseInitializing.type,
-    worker
-  );
+    const unsubscribe = query.onSnapshot(() => {
+      /****/
+    });
+    return () => unsubscribe();
+  });
 }
 
-export const firestoreWatchers = [watchFinishFirebaseInitializing()];
+export function* watchQuerySnapShot() {
+  const chan = yield call(querySnapshotChannel, firebase.firestore());
+  try {
+    while (true) {
+      const docChanges: firebase.firestore.DocumentChange[] = yield take(chan);
+      const addedTasks = docChanges
+        .filter(d => d.type === 'added')
+        .map(d => d.doc.data() as ITask);
+      const removedTasks = docChanges
+        .filter(d => d.type === 'removed')
+        .map(d => d.doc.data() as ITask);
+      const modifiedTasks = docChanges
+        .filter(d => d.type === 'modified')
+        .map(d => d.doc.data() as ITask);
+
+      if (addedTasks.length !== 0) {
+        yield put(firestoreActionCreators.addedTasks(addedTasks));
+      }
+      if (removedTasks.length !== 0) {
+        yield put(firestoreActionCreators.removedTasks(removedTasks));
+      }
+      if (modifiedTasks.length !== 0) {
+        yield put(firestoreActionCreators.modifiedTasks(modifiedTasks));
+      }
+    }
+  } finally {
+  } // tslint:disable-line
+}
+
+const addTaskWorker = bindAsyncAction(firestoreAsyncActionCreators.addTask, {
+  skipStartedAction: true
+})(function*(task: ITask) {
+  const collection = firebase.firestore().collection('tasks');
+  return yield call(collection.add.bind(collection), task);
+});
+
+function* watchAddTask() {
+  function* worker(action: Action<ITask>) {
+    yield addTaskWorker(action.payload);
+  }
+
+  yield takeEvery(firestoreAsyncActionCreators.addTask.started.type, worker);
+}
+
+export const firestoreWatchers = [watchAddTask()];
