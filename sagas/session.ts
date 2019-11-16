@@ -10,6 +10,7 @@ import {
   fromFirebaseUserToUser,
   initializeFirebase
 } from '../services/session';
+import { watchQuerySnapShot } from './firestore';
 
 const logoutWorker = bindAsyncAction(sessionAsyncActionCreators.logout)(
   function*() {
@@ -59,4 +60,5 @@ function* initializeFirebaseWorkerWrapper() {
   initializeFirebase();
   yield put(sessionActionCreators.finishFirebaseInitializing());
   yield fork(saga);
+  yield fork(watchQuerySnapShot);
 }
