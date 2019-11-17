@@ -2,13 +2,13 @@ import { call, put, take, takeEvery } from '@redux-saga/core/effects';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import { eventChannel } from 'redux-saga';
-import { Action } from 'typescript-fsa';
+import { Action, AsyncActionCreators } from 'typescript-fsa';
 import { bindAsyncAction } from 'typescript-fsa-redux-saga';
 import {
   firestoreActionCreators,
   firestoreAsyncActionCreators
 } from '../actions/firestore';
-import { ITask, ITaskDraft, TaskID, toDraft } from '../domain/todo';
+import { ITask, ITaskDraft, toDraft } from '../domain/todo';
 
 function* querySnapshotChannel(firestore: firebase.firestore.Firestore) {
   return eventChannel(emit => {
@@ -91,29 +91,27 @@ function* watchEditTask() {
   yield takeEvery(firestoreAsyncActionCreators.modifyTask.started.type, worker);
 }
 
-function* watchDeleteTask() {
-  const deleteTaskWorker = bindAsyncAction(
-    firestoreAsyncActionCreators.deleteTask,
-    {
-      skipStartedAction: true
-    }
-  )(function*(task: TaskID) {
-    const doc = firebase
-      .firestore()
-      .collection('tasks')
-      .doc(task.id);
+export type DocSelector<Param> = (
+  db: firebase.firestore.Firestore,
+  param: Param
+) => firebase.firestore.DocumentReference;
+export function* watchDeleteDoc<Param, Result, Error>(
+  docSelector: DocSelector<Param>,
+  asyncActionCreators: AsyncActionCreators<Param, Result, Error>
+) {
+  const deleteDocWorker = bindAsyncAction(asyncActionCreators, {
+    skipStartedAction: true
+  })(function*(param: Param) {
+    const db = firebase.firestore();
+    const doc = docSelector(db, param);
     return yield call(doc.delete.bind(doc));
   });
 
-  function* worker(action: Action<TaskID>) {
-    yield deleteTaskWorker(action.payload);
+  function* worker(action: Action<Param>) {
+    yield deleteDocWorker(action.payload);
   }
 
-  yield takeEvery(firestoreAsyncActionCreators.deleteTask.started.type, worker);
+  yield takeEvery(asyncActionCreators.started.type, worker);
 }
 
-export const firestoreWatchers = [
-  watchAddTask(),
-  watchEditTask(),
-  watchDeleteTask()
-];
+export const firestoreWatchers = [watchAddTask(), watchEditTask()];
