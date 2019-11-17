@@ -15,3 +15,10 @@ export interface ITaskDraft {
   description: string;
   isActive: boolean;
 }
+
+export type ProjectID = IID;
+export type IProject = ProjectID & IProjectDraft;
+export interface IProjectDraft {
+  title: string;
+  description: string;
+}

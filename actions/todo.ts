@@ -1,5 +1,6 @@
 import actionCreatorFactory from 'typescript-fsa';
 import { ITask, ITaskDraft } from '../domain/todo';
+import { firebaseActionCreatorFactory } from './firestore';
 
 const todoActionCreatorFactory = actionCreatorFactory('TODO');
 
@@ -20,3 +21,10 @@ export const todoActionCreators = {
     'CLICK_UPDATE_TASK_BUTTON'
   )
 };
+
+const todoCollectionActionCreatorFactory = firebaseActionCreatorFactory(
+  'FIREBASE'
+);
+export const taskCollectionActionCreator = todoCollectionActionCreatorFactory.firestore.collection<
+  ITask
+>('tasks');

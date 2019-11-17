@@ -2,118 +2,193 @@ import { call, put, take, takeEvery } from '@redux-saga/core/effects';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import { eventChannel } from 'redux-saga';
-import { Action } from 'typescript-fsa';
+import { Action, AsyncActionCreators } from 'typescript-fsa';
 import { bindAsyncAction } from 'typescript-fsa-redux-saga';
-import {
-  firestoreActionCreators,
-  firestoreAsyncActionCreators
-} from '../actions/firestore';
-import { ITask, ITaskDraft, TaskID, toDraft } from '../domain/todo';
+import { ICollectionActionCreator } from '../actions/firestore';
 
-function* querySnapshotChannel(firestore: firebase.firestore.Firestore) {
+export interface IDocBase {
+  id: string;
+}
+
+export type DocWithOutBase<Doc> = Omit<Doc, keyof IDocBase>;
+
+function* collectionSnapshotChannel(
+  collection: firebase.firestore.CollectionReference
+) {
   return eventChannel(emit => {
-    const query = firestore.collection('tasks');
-    query.onSnapshot((snapshot: firebase.firestore.QuerySnapshot) => {
+    collection.onSnapshot((snapshot: firebase.firestore.QuerySnapshot) => {
       emit(snapshot.docChanges());
     });
 
-    const unsubscribe = query.onSnapshot(() => {
+    const unsubscribe = collection.onSnapshot(() => {
       /****/
     });
     return () => unsubscribe();
   });
 }
 
-export function* watchQuerySnapShot() {
-  const chan = yield call(querySnapshotChannel, firebase.firestore());
+function* watchCollectionSnapShot<Doc extends IDocBase>(
+  actionCreators: ICollectionActionCreator<Doc>
+) {
+  const collection = firebase
+    .firestore()
+    .collection(actionCreators.collectionPath);
+  const chan = yield call(collectionSnapshotChannel, collection);
   try {
-    const docChangeToTask = (d: firebase.firestore.DocumentChange): ITask => {
-      return { id: d.doc.id, ...d.doc.data() } as ITask;
+    const docChangeToDoc = (d: firebase.firestore.DocumentChange): Doc => {
+      return { id: d.doc.id, ...d.doc.data() } as Doc;
     };
     while (true) {
       const docChanges: firebase.firestore.DocumentChange[] = yield take(chan);
-      const addedTasks = docChanges
+      const addedDocs = docChanges
         .filter(d => d.type === 'added')
-        .map(docChangeToTask);
-      const removedTasks = docChanges
+        .map(docChangeToDoc);
+      const removedDocs = docChanges
         .filter(d => d.type === 'removed')
-        .map(docChangeToTask);
-      const modifiedTasks = docChanges
+        .map(docChangeToDoc);
+      const modifiedDocs = docChanges
         .filter(d => d.type === 'modified')
-        .map(docChangeToTask);
+        .map(docChangeToDoc);
 
-      if (addedTasks.length !== 0) {
-        yield put(firestoreActionCreators.addedTasks(addedTasks));
+      if (addedDocs.length !== 0) {
+        yield put(actionCreators.added(addedDocs));
       }
-      if (removedTasks.length !== 0) {
-        yield put(firestoreActionCreators.removedTasks(removedTasks));
+      if (removedDocs.length !== 0) {
+        yield put(actionCreators.removed(removedDocs));
       }
-      if (modifiedTasks.length !== 0) {
-        yield put(firestoreActionCreators.modifiedTasks(modifiedTasks));
+      if (modifiedDocs.length !== 0) {
+        yield put(actionCreators.modified(modifiedDocs));
       }
     }
   } finally {
   } // tslint:disable-line
 }
 
-function* watchAddTask() {
-  const addTaskWorker = bindAsyncAction(firestoreAsyncActionCreators.addTask, {
+export type DocSelector<Param> = (
+  db: firebase.firestore.Firestore,
+  param: Param
+) => firebase.firestore.DocumentReference;
+export type CollectionSelector<Param> = (
+  db: firebase.firestore.Firestore,
+  param: Param
+) => firebase.firestore.CollectionReference;
+
+export interface IAddDocParam<DocWithOutID, SelectorParam = DocWithOutID> {
+  doc: DocWithOutID;
+  selectorParam: SelectorParam;
+}
+
+const bindToAddDoc = <DocWOBase, SelectorParam, Result, Error>(
+  collectionSelector: CollectionSelector<SelectorParam>,
+  asyncActionCreators: AsyncActionCreators<
+    IAddDocParam<DocWOBase, SelectorParam>,
+    Result,
+    Error
+  >
+) => {
+  return bindAsyncAction(asyncActionCreators, {
     skipStartedAction: true
-  })(function*(task: ITaskDraft) {
-    const collection = firebase.firestore().collection('tasks');
-    return yield call(collection.add.bind(collection), task);
+  })(function*(param) {
+    const db = firebase.firestore();
+    const collection = collectionSelector(db, param.selectorParam);
+    return yield call(collection.add.bind(collection), param.doc);
   });
+};
 
-  function* worker(action: Action<ITaskDraft>) {
-    yield addTaskWorker(action.payload);
-  }
-  yield takeEvery(firestoreAsyncActionCreators.addTask.started.type, worker);
-}
+export type IUpdateDocParam<Doc, SelectorParam = Doc> = IAddDocParam<
+  Doc,
+  SelectorParam
+>;
 
-function* watchEditTask() {
-  const modifyTaskWorker = bindAsyncAction(
-    firestoreAsyncActionCreators.modifyTask,
-    {
-      skipStartedAction: true
-    }
-  )(function*(task: ITask) {
-    const doc = firebase
-      .firestore()
-      .collection('tasks')
-      .doc(task.id);
-    return yield call(doc.set.bind(doc), toDraft(task));
+const bindToModifyDoc = <Doc, SelectorParam, Result, Error>(
+  docSelector: DocSelector<SelectorParam>,
+  asyncActionCreators: AsyncActionCreators<
+    IUpdateDocParam<Doc, SelectorParam>,
+    Result,
+    Error
+  >
+) => {
+  return bindAsyncAction(asyncActionCreators, {
+    skipStartedAction: true
+  })(function*(param) {
+    const db = firebase.firestore();
+    const doc = docSelector(db, param.selectorParam);
+    return yield call(doc.set.bind(doc), param.doc);
   });
-
-  function* worker(action: Action<ITask>) {
-    yield modifyTaskWorker(action.payload);
-  }
-
-  yield takeEvery(firestoreAsyncActionCreators.modifyTask.started.type, worker);
-}
-
-function* watchDeleteTask() {
-  const deleteTaskWorker = bindAsyncAction(
-    firestoreAsyncActionCreators.deleteTask,
-    {
-      skipStartedAction: true
-    }
-  )(function*(task: TaskID) {
-    const doc = firebase
-      .firestore()
-      .collection('tasks')
-      .doc(task.id);
+};
+const bindToRemoveDoc = <SelectorParam, Result, Error>(
+  docSelector: DocSelector<SelectorParam>,
+  asyncActionCreators: AsyncActionCreators<SelectorParam, Result, Error>
+) => {
+  return bindAsyncAction(asyncActionCreators, {
+    skipStartedAction: true
+  })(function*(selectorParam: SelectorParam) {
+    const db = firebase.firestore();
+    const doc = docSelector(db, selectorParam);
     return yield call(doc.delete.bind(doc));
   });
+};
 
-  function* worker(action: Action<TaskID>) {
-    yield deleteTaskWorker(action.payload);
-  }
-
-  yield takeEvery(firestoreAsyncActionCreators.deleteTask.started.type, worker);
+interface ISelectors<Doc> {
+  add: CollectionSelector<DocWithOutBase<Doc>>;
+  modify: DocSelector<Doc>;
+  remove: DocSelector<Doc>;
 }
 
-export const firestoreWatchers = [
-  watchAddTask(),
-  watchEditTask(),
-  watchDeleteTask()
-];
+const newDocSelector = (collectionPath: string) => {
+  return (db: firebase.firestore.Firestore, docBase: IDocBase) => {
+    return db.collection(collectionPath).doc(docBase.id);
+  };
+};
+
+const newCollectionSelector = (collectionPath: string) => {
+  return (db: firebase.firestore.Firestore) => {
+    return db.collection(collectionPath);
+  };
+};
+
+export const bindFireStoreCollection = <Doc extends IDocBase>(
+  actionCreators: ICollectionActionCreator<Doc>,
+  selectors?: ISelectors<Doc>
+) => {
+  if (!selectors) {
+    selectors = {
+      add: newCollectionSelector(actionCreators.collectionPath),
+      modify: newDocSelector(actionCreators.collectionPath),
+      remove: newDocSelector(actionCreators.collectionPath)
+    };
+  }
+
+  return {
+    add: bindToAddDoc(selectors.add, actionCreators.add),
+    modify: bindToModifyDoc(selectors.modify, actionCreators.modify),
+    observe: watchCollectionSnapShot.bind(
+      watchCollectionSnapShot,
+      actionCreators as ICollectionActionCreator<any> // FIXME
+    ),
+    remove: bindToRemoveDoc(selectors.remove, actionCreators.remove)
+  };
+};
+
+export const takeEveryStartedAction = (
+  actionCreator: ICollectionActionCreator<any>,
+  workers: any
+) => {
+  return [
+    (function*() {
+      yield takeEvery(actionCreator.add.started, (action: Action<any>) =>
+        workers.add(action.payload)
+      );
+    })(),
+    (function*() {
+      yield takeEvery(actionCreator.modify.started, (action: Action<any>) =>
+        workers.modify(action.payload)
+      );
+    })(),
+    (function*() {
+      yield takeEvery(actionCreator.remove.started, (action: Action<any>) =>
+        workers.remove(action.payload)
+      );
+    })()
+  ];
+};
