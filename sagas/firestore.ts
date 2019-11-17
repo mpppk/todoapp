@@ -8,7 +8,7 @@ import {
   firestoreActionCreators,
   firestoreAsyncActionCreators
 } from '../actions/firestore';
-import { ITask, ITaskDraft } from '../domain/todo';
+import { ITask } from '../domain/todo';
 
 function* querySnapshotChannel(firestore: firebase.firestore.Firestore) {
   return eventChannel(emit => {
@@ -60,34 +60,61 @@ export type DocSelector<Param> = (
   db: firebase.firestore.Firestore,
   param: Param
 ) => firebase.firestore.DocumentReference;
+export type CollectionSelector<Param> = (
+  db: firebase.firestore.Firestore,
+  param: Param
+) => firebase.firestore.CollectionReference;
 
-function* watchAddTask() {
-  const addTaskWorker = bindAsyncAction(firestoreAsyncActionCreators.addTask, {
+export interface IAddDocParam<Doc, SelectorParam = Doc> {
+  selectorParam: SelectorParam;
+  doc: Doc;
+}
+
+export function* watchAddDoc<Doc, SelectorParam, Result, Error>(
+  collectionSelector: CollectionSelector<SelectorParam>,
+  asyncActionCreators: AsyncActionCreators<
+    IAddDocParam<Doc, SelectorParam>,
+    Result,
+    Error
+  >
+) {
+  const addTaskWorker = bindAsyncAction(asyncActionCreators, {
     skipStartedAction: true
-  })(function*(task: ITaskDraft) {
-    const collection = firebase.firestore().collection('tasks');
-    return yield call(collection.add.bind(collection), task);
+  })(function*(param: IAddDocParam<Doc, SelectorParam>) {
+    const db = firebase.firestore();
+    const collection = collectionSelector(db, param.selectorParam);
+    return yield call(collection.add.bind(collection), param.doc);
   });
 
-  function* worker(action: Action<ITaskDraft>) {
+  function* worker(action: Action<IAddDocParam<Doc, SelectorParam>>) {
     yield addTaskWorker(action.payload);
   }
+
   yield takeEvery(firestoreAsyncActionCreators.addTask.started.type, worker);
 }
 
-export function* watchUpdateDoc<Param, Result, Error>(
-  docSelector: DocSelector<Param>,
-  asyncActionCreators: AsyncActionCreators<Param, Result, Error>
+export type IUpdateDocParam<Doc, SelectorParam = Doc> = IAddDocParam<
+  Doc,
+  SelectorParam
+>;
+
+export function* watchUpdateDoc<Doc, SelectorPram, Result, Error>(
+  docSelector: DocSelector<SelectorPram>,
+  asyncActionCreators: AsyncActionCreators<
+    IUpdateDocParam<Doc, SelectorPram>,
+    Result,
+    Error
+  >
 ) {
   const modifyTaskWorker = bindAsyncAction(asyncActionCreators, {
     skipStartedAction: true
-  })(function*(param: Param) {
+  })(function*(param: IUpdateDocParam<Doc, SelectorPram>) {
     const db = firebase.firestore();
-    const doc = docSelector(db, param);
-    return yield call(doc.set.bind(doc), param);
+    const doc = docSelector(db, param.selectorParam);
+    return yield call(doc.set.bind(doc), param.doc);
   });
 
-  function* worker(action: Action<Param>) {
+  function* worker(action: Action<IUpdateDocParam<Doc, SelectorPram>>) {
     yield modifyTaskWorker(action.payload);
   }
 
@@ -112,5 +139,3 @@ export function* watchDeleteDoc<Param, Result, Error>(
 
   yield takeEvery(asyncActionCreators.started.type, worker);
 }
-
-export const firestoreWatchers = [watchAddTask()];

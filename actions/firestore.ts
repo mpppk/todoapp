@@ -2,12 +2,14 @@ import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import actionCreatorFactory from 'typescript-fsa';
 import { ITask, ITaskDraft, TaskID } from '../domain/todo';
+import { IAddDocParam, IUpdateDocParam } from '../sagas/firestore';
 
 const firestoreActionCreatorFactory = actionCreatorFactory('FIRESTORE');
 
+export type ModifyTaskParam = IUpdateDocParam<ITask, TaskID>;
 export const firestoreAsyncActionCreators = {
   addTask: firestoreActionCreatorFactory.async<
-    ITaskDraft,
+    IAddDocParam<ITaskDraft>,
     firebase.firestore.DocumentReference
   >('ADD_TASKS'),
   deleteTask: firestoreActionCreatorFactory.async<
@@ -15,7 +17,7 @@ export const firestoreAsyncActionCreators = {
     firebase.firestore.DocumentReference
   >('DELETE_TASKS'),
   modifyTask: firestoreActionCreatorFactory.async<
-    ITask,
+    ModifyTaskParam,
     firebase.firestore.DocumentReference
   >('MODIFY_TASKS')
 };
