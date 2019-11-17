@@ -4,12 +4,12 @@ import {
   taskCollectionActionCreator,
   todoActionCreators
 } from '../actions/todo';
-import { ITask, ITaskDraft } from '../domain/todo';
-import { IAddDocParam } from './firestore';
+import { Task, TaskDraft } from '../domain/todo';
+import { AddDocParam } from './firestore';
 
 function* watchClickNewTaskButton() {
-  function* worker(action: Action<ITaskDraft>) {
-    const param: IAddDocParam<ITaskDraft> = {
+  function* worker(action: Action<TaskDraft>) {
+    const param: AddDocParam<TaskDraft> = {
       doc: action.payload,
       selectorParam: action.payload
     };
@@ -20,7 +20,7 @@ function* watchClickNewTaskButton() {
 }
 
 function* watchClickUpdateTaskButton() {
-  function* worker(action: Action<ITask>) {
+  function* worker(action: Action<Task>) {
     const task = action.payload;
     const param = {
       doc: task,
@@ -33,7 +33,7 @@ function* watchClickUpdateTaskButton() {
 }
 
 function* watchClickDeleteTaskButton() {
-  function* worker(action: Action<ITask>) {
+  function* worker(action: Action<Task>) {
     yield put(taskCollectionActionCreator.remove.started(action.payload));
   }
 

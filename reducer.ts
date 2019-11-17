@@ -4,16 +4,16 @@ import {
   taskCollectionActionCreator,
   todoActionCreators
 } from './actions/todo';
-import { ITask } from './domain/todo';
+import { Task } from './domain/todo';
 
 export const exampleInitialState = {
   editTaskId: null as string | null,
   isReadyFirebase: false,
-  tasks: null as ITask[] | null,
-  user: null as IUser | null
+  tasks: null as Task[] | null,
+  user: null as User | null
 };
 
-export interface IUser {
+export interface User {
   displayName?: string;
   email?: string;
   emailVerified: boolean;
@@ -35,11 +35,11 @@ const reducer = reducerWithInitialState(exampleInitialState)
   .case(todoActionCreators.clickCloseTaskButton, state => {
     return { ...state, editTaskId: null };
   })
-  .case(taskCollectionActionCreator.added, (state, tasks: ITask[]) => {
+  .case(taskCollectionActionCreator.added, (state, tasks: Task[]) => {
     const beforeTasks = state.tasks ? state.tasks : [];
     return { ...state, tasks: [...beforeTasks, ...tasks] };
   })
-  .case(taskCollectionActionCreator.modified, (state, tasks: ITask[]) => {
+  .case(taskCollectionActionCreator.modified, (state, tasks: Task[]) => {
     const beforeTasks = state.tasks ? state.tasks : [];
     const newTasks = beforeTasks.map(beforeTask => {
       const task = tasks.find(b => b.id === beforeTask.id);
@@ -47,7 +47,7 @@ const reducer = reducerWithInitialState(exampleInitialState)
     });
     return { ...state, tasks: newTasks };
   })
-  .case(taskCollectionActionCreator.removed, (state, tasks: ITask[]) => {
+  .case(taskCollectionActionCreator.removed, (state, tasks: Task[]) => {
     const beforeTasks = state.tasks ? state.tasks : [];
     const newTasks = beforeTasks.filter(bt => !tasks.find(t => bt.id === t.id));
     return { ...state, tasks: newTasks };

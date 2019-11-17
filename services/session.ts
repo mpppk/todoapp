@@ -1,9 +1,9 @@
 import firebase from 'firebase';
 import getConfig from 'next/config';
 const { publicRuntimeConfig } = getConfig();
-import { IUser } from '../reducer';
+import { User } from '../reducer';
 
-export const fromFirebaseUserToUser = (user: firebase.User): IUser => {
+export const fromFirebaseUserToUser = (user: firebase.User): User => {
   return {
     displayName: user.displayName ? user.displayName : undefined,
     email: user.email ? user.email : undefined,

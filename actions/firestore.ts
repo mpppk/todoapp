@@ -5,20 +5,20 @@ import actionCreatorFactory, {
   AsyncActionCreators
 } from 'typescript-fsa';
 import {
+  AddDocParam,
+  DocBase,
   DocWithOutBase,
-  IAddDocParam,
-  IDocBase,
-  IUpdateDocParam
+  UpdateDocParam
 } from '../sagas/firestore';
 
-export interface ICollectionActionCreator<Doc extends IDocBase> {
+export interface CollectionActionCreator<Doc extends DocBase> {
   add: AsyncActionCreators<
-    IAddDocParam<DocWithOutBase<Doc>, DocWithOutBase<Doc>>,
+    AddDocParam<DocWithOutBase<Doc>, DocWithOutBase<Doc>>,
     firebase.firestore.DocumentReference
   >;
   collectionPath: string;
   modify: AsyncActionCreators<
-    IUpdateDocParam<Doc>,
+    UpdateDocParam<Doc>,
     firebase.firestore.DocumentReference
   >;
   remove: AsyncActionCreators<Doc, firebase.firestore.DocumentReference>;
@@ -31,20 +31,20 @@ export const firebaseActionCreatorFactory = (prefix: string) => {
   const factory = actionCreatorFactory(prefix);
   return {
     firestore: {
-      collection: <Doc extends IDocBase>(
+      collection: <Doc extends DocBase>(
         collectionPath: string
-      ): ICollectionActionCreator<Doc> => {
+      ): CollectionActionCreator<Doc> => {
         const eventPrefix = collectionPath.toUpperCase();
         return {
           add: factory.async<
-            IAddDocParam<DocWithOutBase<Doc>>,
+            AddDocParam<DocWithOutBase<Doc>>,
             firebase.firestore.DocumentReference
           >(`${eventPrefix}_ADD`),
           added: factory<Doc[]>(`${eventPrefix}_ADDED`),
           collectionPath,
           modified: factory<Doc[]>(`${eventPrefix}_MODIFIED`),
           modify: factory.async<
-            IUpdateDocParam<Doc>,
+            UpdateDocParam<Doc>,
             firebase.firestore.DocumentReference
           >(`${eventPrefix}_MODIFY`),
           remove: factory.async<Doc, firebase.firestore.DocumentReference>(

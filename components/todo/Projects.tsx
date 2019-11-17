@@ -1,17 +1,17 @@
 import { Paper } from '@material-ui/core';
 import React from 'react';
-import { IProject } from '../../domain/todo';
+import { Project as ProjectEntity } from '../../domain/todo';
 import { Project } from './Project';
 
-interface IProjectsProps {
-  onClickProject: (project: IProject) => void;
-  onClickDeleteProjectButton: (project: IProject) => void;
-  onClickEditProjectButton: (project: IProject) => void;
-  projects: IProject[];
+interface ProjectsProps {
+  onClickProject: (project: ProjectEntity) => void;
+  onClickDeleteProjectButton: (project: ProjectEntity) => void;
+  onClickEditProjectButton: (project: ProjectEntity) => void;
+  projects: ProjectEntity[];
 }
 
 // tslint:disable-next-line variable-name
-export const Task = (props: IProjectsProps) => {
+export const Task = (props: ProjectsProps) => {
   return (
     <Paper>
       {props.projects.map(project => (

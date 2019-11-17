@@ -4,11 +4,11 @@ import Typography from '@material-ui/core/Typography';
 import DeleteOutline from '@material-ui/icons/DeleteOutline';
 import Edit from '@material-ui/icons/Edit';
 import React, { MouseEventHandler } from 'react';
-import { ITask } from '../../domain/todo';
+import { Task as TaskEntity } from '../../domain/todo';
 
-interface ITaskProps {
-  onClickDeleteButton: (task: ITask) => void;
-  onClickEditButton: (task: ITask) => void;
+interface TaskProps {
+  onClickDeleteButton: (task: TaskEntity) => void;
+  onClickEditButton: (task: TaskEntity) => void;
   id: string;
   title: string;
   description: string;
@@ -16,8 +16,8 @@ interface ITaskProps {
 }
 
 // tslint:disable-next-line variable-name
-export const Task = (props: ITaskProps) => {
-  const currentTask: ITask = {
+export const Task = (props: TaskProps) => {
+  const currentTask: TaskEntity = {
     description: props.description,
     id: props.id,
     isActive: props.isActive,

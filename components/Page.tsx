@@ -4,24 +4,24 @@ import TextField from '@material-ui/core/TextField';
 import { useState } from 'react';
 import * as React from 'react';
 import { ChangeEvent, ClickEvent, EventHandler } from '../core/events';
-import { ITask, ITaskDraft } from '../domain/todo';
-import { IUser } from '../reducer';
+import { Task as TaskEntity, TaskDraft } from '../domain/todo';
+import { User } from '../reducer';
 import { Task } from './todo/Task';
 import { WritableTask } from './todo/WritableTask';
 
-export interface IPageProps {
+export interface PageProps {
   editTaskId: string | null;
-  tasks: ITask[];
-  user: IUser | null;
+  tasks: TaskEntity[];
+  user: User | null;
   disableNewTaskButton: boolean;
-  onClickDeleteTaskButton: (task: ITask) => void;
-  onClickEditTaskButton: (task: ITask) => void;
-  onClickNewTaskButton: (task: ITaskDraft) => void;
-  onClickCloseTaskButton: (task: ITask) => void;
-  onClickUpdateTaskButton: (task: ITask) => void;
+  onClickDeleteTaskButton: (task: TaskEntity) => void;
+  onClickEditTaskButton: (task: TaskEntity) => void;
+  onClickNewTaskButton: (task: TaskDraft) => void;
+  onClickCloseTaskButton: (task: TaskEntity) => void;
+  onClickUpdateTaskButton: (task: TaskEntity) => void;
 }
 
-export default function Page(props: IPageProps) {
+export default function Page(props: PageProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
 

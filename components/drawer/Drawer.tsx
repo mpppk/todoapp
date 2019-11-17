@@ -5,14 +5,14 @@ import { SideList } from './SideList';
 
 const styles = {};
 
-export interface IMyDrawerProps {
+export interface MyDrawerProps {
   open: boolean;
   onClose: () => void;
   onClickSideList: () => void;
 }
 
 // tslint:disable-next-line variable-name
-const MyDrawer: React.FunctionComponent<IMyDrawerProps> = props => {
+const MyDrawer: React.FunctionComponent<MyDrawerProps> = props => {
   const { open, onClose, onClickSideList } = props;
 
   return (

@@ -2,12 +2,12 @@ import Head from 'next/head';
 import Link from 'next/link';
 import * as React from 'react';
 
-interface IProps {
+interface Props {
   title?: string;
 }
 
 // tslint:disable-next-line variable-name
-const Layout: React.FunctionComponent<IProps> = ({
+const Layout: React.FunctionComponent<Props> = ({
   children,
   title = 'This is the default title'
 }) => (

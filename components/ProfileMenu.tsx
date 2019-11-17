@@ -2,14 +2,14 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import * as React from 'react';
 
-interface IProfileListProps {
+interface ProfileListProps {
   anchorEl: null | HTMLElement;
   onClickLogout: () => void;
   onClose: () => void;
 }
 
 // tslint:disable-next-line variable-name
-const ProfileMenu: React.FunctionComponent<IProfileListProps> = props => {
+const ProfileMenu: React.FunctionComponent<ProfileListProps> = props => {
   return (
     <Menu
       id="profile-menu"
