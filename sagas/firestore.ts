@@ -5,51 +5,58 @@ import { eventChannel } from 'redux-saga';
 import { Action, AsyncActionCreators } from 'typescript-fsa';
 import { bindAsyncAction } from 'typescript-fsa-redux-saga';
 import {
-  firestoreActionCreators,
-  firestoreAsyncActionCreators
+  firestoreAsyncActionCreators,
+  ICollectionActionCreator
 } from '../actions/firestore';
-import { ITask } from '../domain/todo';
 
-function* querySnapshotChannel(firestore: firebase.firestore.Firestore) {
+export interface IDocBase {
+  id: string;
+}
+
+function* collectionSnapshotChannel(
+  collection: firebase.firestore.CollectionReference
+) {
   return eventChannel(emit => {
-    const query = firestore.collection('tasks');
-    query.onSnapshot((snapshot: firebase.firestore.QuerySnapshot) => {
+    collection.onSnapshot((snapshot: firebase.firestore.QuerySnapshot) => {
       emit(snapshot.docChanges());
     });
 
-    const unsubscribe = query.onSnapshot(() => {
+    const unsubscribe = collection.onSnapshot(() => {
       /****/
     });
     return () => unsubscribe();
   });
 }
 
-export function* watchQuerySnapShot() {
-  const chan = yield call(querySnapshotChannel, firebase.firestore());
+export function* watchCollectionSnapShot<Doc extends IDocBase>(
+  collection: firebase.firestore.CollectionReference,
+  actionCreators: ICollectionActionCreator<Doc>
+) {
+  const chan = yield call(collectionSnapshotChannel, collection);
   try {
-    const docChangeToTask = (d: firebase.firestore.DocumentChange): ITask => {
-      return { id: d.doc.id, ...d.doc.data() } as ITask;
+    const docChangeToDoc = (d: firebase.firestore.DocumentChange): Doc => {
+      return { id: d.doc.id, ...d.doc.data() } as Doc;
     };
     while (true) {
       const docChanges: firebase.firestore.DocumentChange[] = yield take(chan);
-      const addedTasks = docChanges
+      const addedDocs = docChanges
         .filter(d => d.type === 'added')
-        .map(docChangeToTask);
-      const removedTasks = docChanges
+        .map(docChangeToDoc);
+      const removedDocs = docChanges
         .filter(d => d.type === 'removed')
-        .map(docChangeToTask);
-      const modifiedTasks = docChanges
+        .map(docChangeToDoc);
+      const modifiedDocs = docChanges
         .filter(d => d.type === 'modified')
-        .map(docChangeToTask);
+        .map(docChangeToDoc);
 
-      if (addedTasks.length !== 0) {
-        yield put(firestoreActionCreators.addedTasks(addedTasks));
+      if (addedDocs.length !== 0) {
+        yield put(actionCreators.added(addedDocs));
       }
-      if (removedTasks.length !== 0) {
-        yield put(firestoreActionCreators.removedTasks(removedTasks));
+      if (removedDocs.length !== 0) {
+        yield put(actionCreators.removed(removedDocs));
       }
-      if (modifiedTasks.length !== 0) {
-        yield put(firestoreActionCreators.modifiedTasks(modifiedTasks));
+      if (modifiedDocs.length !== 0) {
+        yield put(actionCreators.modified(modifiedDocs));
       }
     }
   } finally {

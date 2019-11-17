@@ -1,7 +1,9 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import { firestoreActionCreators } from './actions/firestore';
 import { sessionActionCreators } from './actions/session';
-import { todoActionCreators } from './actions/todo';
+import {
+  taskCollectionActionCreator,
+  todoActionCreators
+} from './actions/todo';
 import { ITask } from './domain/todo';
 
 export const exampleInitialState = {
@@ -33,11 +35,11 @@ const reducer = reducerWithInitialState(exampleInitialState)
   .case(todoActionCreators.clickCloseTaskButton, state => {
     return { ...state, editTaskId: null };
   })
-  .case(firestoreActionCreators.addedTasks, (state, tasks: ITask[]) => {
+  .case(taskCollectionActionCreator.added, (state, tasks: ITask[]) => {
     const beforeTasks = state.tasks ? state.tasks : [];
     return { ...state, tasks: [...beforeTasks, ...tasks] };
   })
-  .case(firestoreActionCreators.modifiedTasks, (state, tasks: ITask[]) => {
+  .case(taskCollectionActionCreator.modified, (state, tasks: ITask[]) => {
     const beforeTasks = state.tasks ? state.tasks : [];
     const newTasks = beforeTasks.map(beforeTask => {
       const task = tasks.find(b => b.id === beforeTask.id);
@@ -45,7 +47,7 @@ const reducer = reducerWithInitialState(exampleInitialState)
     });
     return { ...state, tasks: newTasks };
   })
-  .case(firestoreActionCreators.removedTasks, (state, tasks: ITask[]) => {
+  .case(taskCollectionActionCreator.removed, (state, tasks: ITask[]) => {
     const beforeTasks = state.tasks ? state.tasks : [];
     const newTasks = beforeTasks.filter(bt => !tasks.find(t => bt.id === t.id));
     return { ...state, tasks: newTasks };
