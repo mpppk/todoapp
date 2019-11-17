@@ -8,7 +8,7 @@ import {
   firestoreActionCreators,
   firestoreAsyncActionCreators
 } from '../actions/firestore';
-import { ITask, ITaskDraft, toDraft } from '../domain/todo';
+import { ITask, ITaskDraft } from '../domain/todo';
 
 function* querySnapshotChannel(firestore: firebase.firestore.Firestore) {
   return eventChannel(emit => {
@@ -56,6 +56,11 @@ export function* watchQuerySnapShot() {
   } // tslint:disable-line
 }
 
+export type DocSelector<Param> = (
+  db: firebase.firestore.Firestore,
+  param: Param
+) => firebase.firestore.DocumentReference;
+
 function* watchAddTask() {
   const addTaskWorker = bindAsyncAction(firestoreAsyncActionCreators.addTask, {
     skipStartedAction: true
@@ -70,31 +75,25 @@ function* watchAddTask() {
   yield takeEvery(firestoreAsyncActionCreators.addTask.started.type, worker);
 }
 
-function* watchEditTask() {
-  const modifyTaskWorker = bindAsyncAction(
-    firestoreAsyncActionCreators.modifyTask,
-    {
-      skipStartedAction: true
-    }
-  )(function*(task: ITask) {
-    const doc = firebase
-      .firestore()
-      .collection('tasks')
-      .doc(task.id);
-    return yield call(doc.set.bind(doc), toDraft(task));
+export function* watchUpdateDoc<Param, Result, Error>(
+  docSelector: DocSelector<Param>,
+  asyncActionCreators: AsyncActionCreators<Param, Result, Error>
+) {
+  const modifyTaskWorker = bindAsyncAction(asyncActionCreators, {
+    skipStartedAction: true
+  })(function*(param: Param) {
+    const db = firebase.firestore();
+    const doc = docSelector(db, param);
+    return yield call(doc.set.bind(doc), param);
   });
 
-  function* worker(action: Action<ITask>) {
+  function* worker(action: Action<Param>) {
     yield modifyTaskWorker(action.payload);
   }
 
-  yield takeEvery(firestoreAsyncActionCreators.modifyTask.started.type, worker);
+  yield takeEvery(asyncActionCreators.started.type, worker);
 }
 
-export type DocSelector<Param> = (
-  db: firebase.firestore.Firestore,
-  param: Param
-) => firebase.firestore.DocumentReference;
 export function* watchDeleteDoc<Param, Result, Error>(
   docSelector: DocSelector<Param>,
   asyncActionCreators: AsyncActionCreators<Param, Result, Error>
@@ -114,4 +113,4 @@ export function* watchDeleteDoc<Param, Result, Error>(
   yield takeEvery(asyncActionCreators.started.type, worker);
 }
 
-export const firestoreWatchers = [watchAddTask(), watchEditTask()];
+export const firestoreWatchers = [watchAddTask()];
