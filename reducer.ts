@@ -1,14 +1,16 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import { sessionActionCreators } from './actions/session';
 import {
+  projectCollectionActionCreator,
   taskCollectionActionCreator,
   todoActionCreators
 } from './actions/todo';
-import { Task } from './domain/todo';
+import { Project, Task } from './domain/todo';
 
 export const exampleInitialState = {
   editTaskId: null as string | null,
   isReadyFirebase: false,
+  projects: null as Project[] | null,
   tasks: null as Task[] | null,
   user: null as User | null
 };
@@ -38,6 +40,10 @@ const reducer = reducerWithInitialState(exampleInitialState)
   .case(taskCollectionActionCreator.added, (state, tasks: Task[]) => {
     const beforeTasks = state.tasks ? state.tasks : [];
     return { ...state, tasks: [...beforeTasks, ...tasks] };
+  })
+  .case(projectCollectionActionCreator.added, (state, projects: Project[]) => {
+    const beforeProjects = state.projects ? state.projects : [];
+    return { ...state, projects: [...beforeProjects, ...projects] };
   })
   .case(taskCollectionActionCreator.modified, (state, tasks: Task[]) => {
     const beforeTasks = state.tasks ? state.tasks : [];

@@ -1,12 +1,21 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { sessionActionCreators } from '../actions/session';
+import { todoActionCreators } from '../actions/todo';
 import MyAppBar from '../components/AppBar';
+import { Projects } from '../components/todo/Projects';
+import { Project } from '../domain/todo';
 import { State } from '../reducer';
 
 const useHandlers = () => {
   const dispatch = useDispatch();
   return {
+    clickDeleteProjectButton: (project: Project) =>
+      dispatch(todoActionCreators.clickDeleteProjectButton(project)),
+    clickEditProjectButton: (project: Project) =>
+      dispatch(todoActionCreators.clickEditProjectButton(project)),
+    clickProject: (project: Project) =>
+      dispatch(todoActionCreators.clickProject(project)),
     requestToInitializeFirebase: () => {
       dispatch(sessionActionCreators.requestToInitializeFirebase());
     },
@@ -14,26 +23,28 @@ const useHandlers = () => {
   };
 };
 
-const useReduxState = () => {
-  const user = useSelector((state: State) => state.user);
-  const isReadyFirebase = useSelector((state: State) => state.isReadyFirebase);
-  return { user, isReadyFirebase };
+const selector = (state: State) => {
+  return {
+    projects: state.projects ? state.projects : [],
+    user: state.user
+  };
 };
 
 export default () => {
   const handlers = useHandlers();
-  const state = useReduxState();
+  const state = useSelector(selector);
 
   useEffect(handlers.requestToInitializeFirebase, []);
-  // useEffect(() => {
-  //   if (state.isReadyFirebase) {
-  //     handlers.subscribeProjects();
-  //   }
-  // }, [state.isReadyFirebase]);
 
   return (
     <div>
       <MyAppBar user={state.user} onClickLogout={handlers.requestToLogout} />
+      <Projects
+        onClickDeleteProjectButton={handlers.clickDeleteProjectButton}
+        onClickEditProjectButton={handlers.clickEditProjectButton}
+        onClickProject={handlers.clickProject}
+        projects={state.projects}
+      />
     </div>
   );
 };
