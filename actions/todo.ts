@@ -27,4 +27,4 @@ const todoCollectionActionCreatorFactory = firebaseActionCreatorFactory(
 );
 export const taskCollectionActionCreator = todoCollectionActionCreatorFactory.firestore.collection<
   ITask
->('TASK');
+>('tasks');

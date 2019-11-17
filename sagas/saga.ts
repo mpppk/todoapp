@@ -9,6 +9,6 @@ export default function* rootSaga() {
     watchIncrementAsync(),
     ...sessionWatchers,
     ...todoWatchers,
-    ...taskWatchers
+    ...taskWatchers.write
   ]);
 }

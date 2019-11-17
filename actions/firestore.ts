@@ -16,6 +16,7 @@ export interface ICollectionActionCreator<Doc extends IDocBase> {
     IAddDocParam<DocWithOutBase<Doc>, DocWithOutBase<Doc>>,
     firebase.firestore.DocumentReference
   >;
+  collectionPath: string;
   modify: AsyncActionCreators<
     IUpdateDocParam<Doc>,
     firebase.firestore.DocumentReference
@@ -31,23 +32,25 @@ export const firebaseActionCreatorFactory = (prefix: string) => {
   return {
     firestore: {
       collection: <Doc extends IDocBase>(
-        docName: string
+        collectionPath: string
       ): ICollectionActionCreator<Doc> => {
+        const eventPrefix = collectionPath.toUpperCase();
         return {
           add: factory.async<
             IAddDocParam<DocWithOutBase<Doc>>,
             firebase.firestore.DocumentReference
-          >(`${docName}_ADD`),
-          added: factory<Doc[]>(`${docName}_ADDED`),
-          modified: factory<Doc[]>(`${docName}_MODIFIED`),
+          >(`${eventPrefix}_ADD`),
+          added: factory<Doc[]>(`${eventPrefix}_ADDED`),
+          collectionPath,
+          modified: factory<Doc[]>(`${eventPrefix}_MODIFIED`),
           modify: factory.async<
             IUpdateDocParam<Doc>,
             firebase.firestore.DocumentReference
-          >(`${docName}_MODIFY`),
+          >(`${eventPrefix}_MODIFY`),
           remove: factory.async<Doc, firebase.firestore.DocumentReference>(
-            `${docName}_REMOVE`
+            `${eventPrefix}_REMOVE`
           ),
-          removed: factory<Doc[]>(`${docName}_REMOVED`)
+          removed: factory<Doc[]>(`${eventPrefix}_REMOVED`)
         };
       }
     }

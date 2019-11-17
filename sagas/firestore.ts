@@ -9,6 +9,7 @@ import { ICollectionActionCreator } from '../actions/firestore';
 export interface IDocBase {
   id: string;
 }
+
 export type DocWithOutBase<Doc> = Omit<Doc, keyof IDocBase>;
 
 function* collectionSnapshotChannel(
@@ -150,13 +151,46 @@ interface ISelectors<Doc> {
   modify: DocSelector<Doc>;
   remove: DocSelector<Doc>;
 }
+
 export const bindFireStoreCollection = <Doc extends IDocBase>(
   actionCreators: ICollectionActionCreator<Doc>,
-  selectors: ISelectors<Doc>
+  selectors?: ISelectors<Doc>
 ) => {
-  return [
-    watchAddDoc(selectors.add, actionCreators.add),
-    watchModifyDoc(selectors.modify, actionCreators.modify),
-    watchRemoveDoc(selectors.remove, actionCreators.remove)
-  ];
+  if (!selectors) {
+    selectors = {
+      add: newCollectionSelector(actionCreators.collectionPath),
+      modify: newDocSelector(actionCreators.collectionPath),
+      remove: newDocSelector(actionCreators.collectionPath)
+    };
+  }
+
+  return {
+    read: () => {
+      const collection = firebase
+        .firestore()
+        .collection(actionCreators.collectionPath);
+      return watchCollectionSnapShot.bind(
+        watchCollectionSnapShot,
+        collection,
+        actionCreators as ICollectionActionCreator<any> // FIXME
+      );
+    },
+    write: [
+      watchAddDoc(selectors.add, actionCreators.add),
+      watchModifyDoc(selectors.modify, actionCreators.modify),
+      watchRemoveDoc(selectors.remove, actionCreators.remove)
+    ]
+  };
+};
+
+const newDocSelector = (collectionPath: string) => {
+  return (db: firebase.firestore.Firestore, docBase: IDocBase) => {
+    return db.collection(collectionPath).doc(docBase.id);
+  };
+};
+
+const newCollectionSelector = (collectionPath: string) => {
+  return (db: firebase.firestore.Firestore) => {
+    return db.collection(collectionPath);
+  };
 };
