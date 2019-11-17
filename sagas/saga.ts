@@ -1,7 +1,7 @@
 import { all } from '@redux-saga/core/effects';
 import { watchIncrementAsync } from './counter';
 import { sessionWatchers } from './session';
-import { taskWatchers } from './task';
+import { projectWatchers, taskWatchers } from './task';
 import { todoWatchers } from './todo';
 
 export default function* rootSaga() {
@@ -9,6 +9,7 @@ export default function* rootSaga() {
     watchIncrementAsync(),
     ...sessionWatchers,
     ...todoWatchers,
-    ...taskWatchers
+    ...taskWatchers,
+    ...projectWatchers
   ]);
 }
