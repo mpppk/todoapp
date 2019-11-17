@@ -4,14 +4,12 @@ import 'firebase/firestore';
 import { eventChannel } from 'redux-saga';
 import { Action, AsyncActionCreators } from 'typescript-fsa';
 import { bindAsyncAction } from 'typescript-fsa-redux-saga';
-import {
-  firestoreAsyncActionCreators,
-  ICollectionActionCreator
-} from '../actions/firestore';
+import { ICollectionActionCreator } from '../actions/firestore';
 
 export interface IDocBase {
   id: string;
 }
+export type DocWithOutBase<Doc> = Omit<Doc, keyof IDocBase>;
 
 function* collectionSnapshotChannel(
   collection: firebase.firestore.CollectionReference
@@ -72,32 +70,32 @@ export type CollectionSelector<Param> = (
   param: Param
 ) => firebase.firestore.CollectionReference;
 
-export interface IAddDocParam<Doc, SelectorParam = Doc> {
+export interface IAddDocParam<DocWithOutID, SelectorParam = DocWithOutID> {
+  doc: DocWithOutID;
   selectorParam: SelectorParam;
-  doc: Doc;
 }
 
-export function* watchAddDoc<Doc, SelectorParam, Result, Error>(
+function* watchAddDoc<DocWOBase, SelectorParam, Result, Error>(
   collectionSelector: CollectionSelector<SelectorParam>,
   asyncActionCreators: AsyncActionCreators<
-    IAddDocParam<Doc, SelectorParam>,
+    IAddDocParam<DocWOBase, SelectorParam>,
     Result,
     Error
   >
 ) {
   const addTaskWorker = bindAsyncAction(asyncActionCreators, {
     skipStartedAction: true
-  })(function*(param: IAddDocParam<Doc, SelectorParam>) {
+  })(function*(param) {
     const db = firebase.firestore();
     const collection = collectionSelector(db, param.selectorParam);
     return yield call(collection.add.bind(collection), param.doc);
   });
 
-  function* worker(action: Action<IAddDocParam<Doc, SelectorParam>>) {
+  function* worker(action: Action<IAddDocParam<DocWOBase, SelectorParam>>) {
     yield addTaskWorker(action.payload);
   }
 
-  yield takeEvery(firestoreAsyncActionCreators.addTask.started.type, worker);
+  yield takeEvery(asyncActionCreators.started.type, worker);
 }
 
 export type IUpdateDocParam<Doc, SelectorParam = Doc> = IAddDocParam<
@@ -105,7 +103,7 @@ export type IUpdateDocParam<Doc, SelectorParam = Doc> = IAddDocParam<
   SelectorParam
 >;
 
-export function* watchUpdateDoc<Doc, SelectorPram, Result, Error>(
+function* watchModifyDoc<Doc, SelectorPram, Result, Error>(
   docSelector: DocSelector<SelectorPram>,
   asyncActionCreators: AsyncActionCreators<
     IUpdateDocParam<Doc, SelectorPram>,
@@ -128,21 +126,37 @@ export function* watchUpdateDoc<Doc, SelectorPram, Result, Error>(
   yield takeEvery(asyncActionCreators.started.type, worker);
 }
 
-export function* watchDeleteDoc<Param, Result, Error>(
-  docSelector: DocSelector<Param>,
-  asyncActionCreators: AsyncActionCreators<Param, Result, Error>
+function* watchRemoveDoc<SelectorParam, Result, Error>(
+  docSelector: DocSelector<SelectorParam>,
+  asyncActionCreators: AsyncActionCreators<SelectorParam, Result, Error>
 ) {
   const deleteDocWorker = bindAsyncAction(asyncActionCreators, {
     skipStartedAction: true
-  })(function*(param: Param) {
+  })(function*(selectorParam: SelectorParam) {
     const db = firebase.firestore();
-    const doc = docSelector(db, param);
+    const doc = docSelector(db, selectorParam);
     return yield call(doc.delete.bind(doc));
   });
 
-  function* worker(action: Action<Param>) {
+  function* worker(action: Action<SelectorParam>) {
     yield deleteDocWorker(action.payload);
   }
 
   yield takeEvery(asyncActionCreators.started.type, worker);
 }
+
+interface ISelectors<Doc> {
+  add: CollectionSelector<DocWithOutBase<Doc>>;
+  modify: DocSelector<Doc>;
+  remove: DocSelector<Doc>;
+}
+export const bindFireStoreCollection = <Doc extends IDocBase>(
+  actionCreators: ICollectionActionCreator<Doc>,
+  selectors: ISelectors<Doc>
+) => {
+  return [
+    watchAddDoc(selectors.add, actionCreators.add),
+    watchModifyDoc(selectors.modify, actionCreators.modify),
+    watchRemoveDoc(selectors.remove, actionCreators.remove)
+  ];
+};

@@ -1,18 +1,21 @@
 import * as firebase from 'firebase';
-import { firestoreAsyncActionCreators } from '../actions/firestore';
+import { taskCollectionActionCreator } from '../actions/todo';
 import { TaskID } from '../domain/todo';
-import { watchAddDoc, watchDeleteDoc, watchUpdateDoc } from './firestore';
+import { bindFireStoreCollection } from './firestore';
 
-const createTaskDoc = (db: firebase.firestore.Firestore, task: TaskID) => {
+const taskDocSelector = (db: firebase.firestore.Firestore, task: TaskID) => {
   return db.collection('tasks').doc(task.id);
 };
 
-const createTaskCollection = (db: firebase.firestore.Firestore) => {
+const taskCollectionSelector = (db: firebase.firestore.Firestore) => {
   return db.collection('tasks');
 };
 
-export const taskWatchers = [
-  watchAddDoc(createTaskCollection, firestoreAsyncActionCreators.addTask),
-  watchUpdateDoc(createTaskDoc, firestoreAsyncActionCreators.modifyTask),
-  watchDeleteDoc(createTaskDoc, firestoreAsyncActionCreators.deleteTask)
-];
+export const taskWatchers = bindFireStoreCollection(
+  taskCollectionActionCreator,
+  {
+    add: taskCollectionSelector,
+    modify: taskDocSelector,
+    remove: taskDocSelector
+  }
+);

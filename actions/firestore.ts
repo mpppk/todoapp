@@ -1,12 +1,26 @@
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
-import actionCreatorFactory, { ActionCreator } from 'typescript-fsa';
-import { ITask, ITaskDraft, TaskID } from '../domain/todo';
-import { IAddDocParam, IUpdateDocParam } from '../sagas/firestore';
+import actionCreatorFactory, {
+  ActionCreator,
+  AsyncActionCreators
+} from 'typescript-fsa';
+import {
+  DocWithOutBase,
+  IAddDocParam,
+  IDocBase,
+  IUpdateDocParam
+} from '../sagas/firestore';
 
-const firestoreActionCreatorFactory = actionCreatorFactory('FIRESTORE');
-
-export interface ICollectionActionCreator<Doc> {
+export interface ICollectionActionCreator<Doc extends IDocBase> {
+  add: AsyncActionCreators<
+    IAddDocParam<DocWithOutBase<Doc>, DocWithOutBase<Doc>>,
+    firebase.firestore.DocumentReference
+  >;
+  modify: AsyncActionCreators<
+    IUpdateDocParam<Doc>,
+    firebase.firestore.DocumentReference
+  >;
+  remove: AsyncActionCreators<Doc, firebase.firestore.DocumentReference>;
   added: ActionCreator<Doc[]>;
   modified: ActionCreator<Doc[]>;
   removed: ActionCreator<Doc[]>;
@@ -16,29 +30,26 @@ export const firebaseActionCreatorFactory = (prefix: string) => {
   const factory = actionCreatorFactory(prefix);
   return {
     firestore: {
-      collection: <Doc>(docName: string): ICollectionActionCreator<Doc> => {
+      collection: <Doc extends IDocBase>(
+        docName: string
+      ): ICollectionActionCreator<Doc> => {
         return {
+          add: factory.async<
+            IAddDocParam<DocWithOutBase<Doc>>,
+            firebase.firestore.DocumentReference
+          >(`${docName}_ADD`),
           added: factory<Doc[]>(`${docName}_ADDED`),
           modified: factory<Doc[]>(`${docName}_MODIFIED`),
+          modify: factory.async<
+            IUpdateDocParam<Doc>,
+            firebase.firestore.DocumentReference
+          >(`${docName}_MODIFY`),
+          remove: factory.async<Doc, firebase.firestore.DocumentReference>(
+            `${docName}_REMOVE`
+          ),
           removed: factory<Doc[]>(`${docName}_REMOVED`)
         };
       }
     }
   };
-};
-
-export type ModifyTaskParam = IUpdateDocParam<ITask, TaskID>;
-export const firestoreAsyncActionCreators = {
-  addTask: firestoreActionCreatorFactory.async<
-    IAddDocParam<ITaskDraft>,
-    firebase.firestore.DocumentReference
-  >('ADD_TASKS'),
-  deleteTask: firestoreActionCreatorFactory.async<
-    TaskID,
-    firebase.firestore.DocumentReference
-  >('DELETE_TASKS'),
-  modifyTask: firestoreActionCreatorFactory.async<
-    ModifyTaskParam,
-    firebase.firestore.DocumentReference
-  >('MODIFY_TASKS')
 };
