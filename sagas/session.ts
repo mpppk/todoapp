@@ -10,7 +10,7 @@ import {
   fromFirebaseUserToUser,
   initializeFirebase
 } from '../services/session';
-import { taskWatchers } from './task';
+import { taskWorkers } from './task';
 
 const logoutWorker = bindAsyncAction(sessionAsyncActionCreators.logout)(
   function*() {
@@ -60,5 +60,5 @@ function* initializeFirebaseWorkerWrapper() {
   initializeFirebase();
   yield put(sessionActionCreators.finishFirebaseInitializing());
   yield fork(saga);
-  yield fork(taskWatchers.read());
+  yield fork(taskWorkers.observe());
 }
