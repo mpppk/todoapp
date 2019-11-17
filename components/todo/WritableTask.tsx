@@ -5,11 +5,11 @@ import CloseOutline from '@material-ui/icons/CloseOutlined';
 import KeyboardReturnOutlined from '@material-ui/icons/KeyboardReturnOutlined';
 import React, { MouseEventHandler, useState } from 'react';
 import { ChangeEvent, EventHandler } from '../../core/events';
-import { ITask } from '../../domain/todo';
+import { Task } from '../../domain/todo';
 
-interface IWritableTaskProps {
-  onClickUpdateButton: (task: ITask) => void;
-  onClickCloseButton: (task: ITask) => void;
+interface WritableTaskProps {
+  onClickUpdateButton: (task: Task) => void;
+  onClickCloseButton: (task: Task) => void;
   id: string;
   title: string;
   description: string;
@@ -17,7 +17,7 @@ interface IWritableTaskProps {
 }
 
 // tslint:disable-next-line variable-name
-export const WritableTask = (props: IWritableTaskProps) => {
+export const WritableTask = (props: WritableTaskProps) => {
   const [title, setTitle] = useState(props.title);
   const [description, setDescription] = useState(props.description);
 
@@ -27,7 +27,7 @@ export const WritableTask = (props: IWritableTaskProps) => {
     setDescription(e.target.value);
 
   const handleClickUpdateButton: MouseEventHandler = () => {
-    const currentTask: ITask = {
+    const currentTask: Task = {
       description,
       id: props.id,
       isActive: props.isActive,
@@ -37,7 +37,7 @@ export const WritableTask = (props: IWritableTaskProps) => {
   };
 
   const handleClickCloseButton: MouseEventHandler = () => {
-    const currentTask: ITask = {
+    const currentTask: Task = {
       description,
       id: props.id,
       isActive: props.isActive,

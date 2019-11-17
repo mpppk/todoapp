@@ -4,13 +4,13 @@ import 'firebase/firestore';
 import { eventChannel } from 'redux-saga';
 import { Action, AsyncActionCreators } from 'typescript-fsa';
 import { bindAsyncAction } from 'typescript-fsa-redux-saga';
-import { ICollectionActionCreator } from '../actions/firestore';
+import { CollectionActionCreator } from '../actions/firestore';
 
-export interface IDocBase {
+export interface DocBase {
   id: string;
 }
 
-export type DocWithOutBase<Doc> = Omit<Doc, keyof IDocBase>;
+export type DocWithOutBase<Doc> = Omit<Doc, keyof DocBase>;
 
 function* collectionSnapshotChannel(
   collection: firebase.firestore.CollectionReference
@@ -27,8 +27,8 @@ function* collectionSnapshotChannel(
   });
 }
 
-function* watchCollectionSnapShot<Doc extends IDocBase>(
-  actionCreators: ICollectionActionCreator<Doc>
+function* watchCollectionSnapShot<Doc extends DocBase>(
+  actionCreators: CollectionActionCreator<Doc>
 ) {
   const collection = firebase
     .firestore()
@@ -73,7 +73,7 @@ export type CollectionSelector<Param> = (
   param: Param
 ) => firebase.firestore.CollectionReference;
 
-export interface IAddDocParam<DocWithOutID, SelectorParam = DocWithOutID> {
+export interface AddDocParam<DocWithOutID, SelectorParam = DocWithOutID> {
   doc: DocWithOutID;
   selectorParam: SelectorParam;
 }
@@ -81,7 +81,7 @@ export interface IAddDocParam<DocWithOutID, SelectorParam = DocWithOutID> {
 const bindToAddDoc = <DocWOBase, SelectorParam, Result, Error>(
   collectionSelector: CollectionSelector<SelectorParam>,
   asyncActionCreators: AsyncActionCreators<
-    IAddDocParam<DocWOBase, SelectorParam>,
+    AddDocParam<DocWOBase, SelectorParam>,
     Result,
     Error
   >
@@ -95,7 +95,7 @@ const bindToAddDoc = <DocWOBase, SelectorParam, Result, Error>(
   });
 };
 
-export type IUpdateDocParam<Doc, SelectorParam = Doc> = IAddDocParam<
+export type UpdateDocParam<Doc, SelectorParam = Doc> = AddDocParam<
   Doc,
   SelectorParam
 >;
@@ -103,7 +103,7 @@ export type IUpdateDocParam<Doc, SelectorParam = Doc> = IAddDocParam<
 const bindToModifyDoc = <Doc, SelectorParam, Result, Error>(
   docSelector: DocSelector<SelectorParam>,
   asyncActionCreators: AsyncActionCreators<
-    IUpdateDocParam<Doc, SelectorParam>,
+    UpdateDocParam<Doc, SelectorParam>,
     Result,
     Error
   >
@@ -129,14 +129,14 @@ const bindToRemoveDoc = <SelectorParam, Result, Error>(
   });
 };
 
-interface ISelectors<Doc> {
+interface Selectors<Doc> {
   add: CollectionSelector<DocWithOutBase<Doc>>;
   modify: DocSelector<Doc>;
   remove: DocSelector<Doc>;
 }
 
 const newDocSelector = (collectionPath: string) => {
-  return (db: firebase.firestore.Firestore, docBase: IDocBase) => {
+  return (db: firebase.firestore.Firestore, docBase: DocBase) => {
     return db.collection(collectionPath).doc(docBase.id);
   };
 };
@@ -147,9 +147,9 @@ const newCollectionSelector = (collectionPath: string) => {
   };
 };
 
-export const bindFireStoreCollection = <Doc extends IDocBase>(
-  actionCreators: ICollectionActionCreator<Doc>,
-  selectors?: ISelectors<Doc>
+export const bindFireStoreCollection = <Doc extends DocBase>(
+  actionCreators: CollectionActionCreator<Doc>,
+  selectors?: Selectors<Doc>
 ) => {
   if (!selectors) {
     selectors = {
@@ -164,14 +164,14 @@ export const bindFireStoreCollection = <Doc extends IDocBase>(
     modify: bindToModifyDoc(selectors.modify, actionCreators.modify),
     observe: watchCollectionSnapShot.bind(
       watchCollectionSnapShot,
-      actionCreators as ICollectionActionCreator<any> // FIXME
+      actionCreators as CollectionActionCreator<any> // FIXME
     ),
     remove: bindToRemoveDoc(selectors.remove, actionCreators.remove)
   };
 };
 
 export const takeEveryStartedAction = (
-  actionCreator: ICollectionActionCreator<any>,
+  actionCreator: CollectionActionCreator<any>,
   workers: any
 ) => {
   return [

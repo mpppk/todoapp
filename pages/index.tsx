@@ -4,21 +4,21 @@ import { sessionActionCreators } from '../actions/session';
 import { todoActionCreators } from '../actions/todo';
 import MyAppBar from '../components/AppBar';
 import Page from '../components/Page';
-import { ITask, ITaskDraft } from '../domain/todo';
+import { Task, TaskDraft } from '../domain/todo';
 import { State } from '../reducer';
 
 const useHandlers = () => {
   const dispatch = useDispatch();
   return {
-    clickCloseTaskButton: (task: ITask) =>
+    clickCloseTaskButton: (task: Task) =>
       dispatch(todoActionCreators.clickCloseTaskButton(task)),
-    clickDeleteTaskButton: (task: ITask) =>
+    clickDeleteTaskButton: (task: Task) =>
       dispatch(todoActionCreators.clickDeleteTaskButton(task)),
-    clickEditTaskButton: (task: ITask) =>
+    clickEditTaskButton: (task: Task) =>
       dispatch(todoActionCreators.clickEditTaskButton(task)),
-    clickNewTaskButton: (task: ITaskDraft) =>
+    clickNewTaskButton: (task: TaskDraft) =>
       dispatch(todoActionCreators.clickNewTaskButton(task)),
-    clickUpdateTaskButton: (task: ITask) =>
+    clickUpdateTaskButton: (task: Task) =>
       dispatch(todoActionCreators.clickUpdateTaskButton(task)),
     requestToInitializeFirebase: () => {
       dispatch(sessionActionCreators.requestToInitializeFirebase());

@@ -2,11 +2,11 @@ import { Avatar, Theme } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/styles';
 import React from 'react';
-import { IUser } from '../reducer';
+import { User } from '../reducer';
 import ProfileMenu from './ProfileMenu';
 
-export interface IProfileButtonProps {
-  user: IUser;
+export interface ProfileButtonProps {
+  user: User;
   onClickLogout: () => void;
 }
 
@@ -17,7 +17,7 @@ const useStyles = makeStyles((_: Theme) => ({
 }));
 
 // tslint:disable-next-line variable-name
-const ProfileButton: React.FunctionComponent<IProfileButtonProps> = props => {
+const ProfileButton: React.FunctionComponent<ProfileButtonProps> = props => {
   const classes = useStyles(undefined);
   const { user } = props;
 

@@ -3,7 +3,7 @@ import * as React from 'react';
 import Page from '../../components/Page';
 import { Task } from '../../components/todo/Task';
 import { WritableTask } from '../../components/todo/WritableTask';
-import { ITask } from '../../domain/todo';
+import { Task as TaskEntity } from '../../domain/todo';
 
 describe('Page', () => {
   // tslint:disable-next-line no-empty
@@ -31,7 +31,7 @@ describe('Page with task', () => {
   // tslint:disable-next-line no-empty
   const emptyClickEventHandler = () => {};
 
-  const tasks: ITask[] = [
+  const tasks: TaskEntity[] = [
     {
       description: 'description',
       id: 'id',
@@ -65,7 +65,7 @@ describe('Page with editable task', () => {
   // tslint:disable-next-line no-empty
   const emptyClickEventHandler = () => {};
 
-  const tasks: ITask[] = [
+  const tasks: TaskEntity[] = [
     {
       description: 'description',
       id: 'id',

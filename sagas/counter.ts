@@ -3,12 +3,12 @@ import { bindAsyncAction } from 'typescript-fsa-redux-saga';
 import {
   counterActionCreators,
   counterAsyncActionCreators,
-  IRequestAmountChangingWithSleepPayload
+  RequestAmountChangingWithSleepPayload
 } from '../actions/counter';
 
 export const counterIncrementWorker = bindAsyncAction(
   counterAsyncActionCreators.changeAmountWithSleep
-)(function*(payload: IRequestAmountChangingWithSleepPayload) {
+)(function*(payload: RequestAmountChangingWithSleepPayload) {
   yield delay(payload.sleep);
   return { amount: payload.amount };
 } as any); // FIXME remove any

@@ -1,24 +1,24 @@
-export type ITask = TaskID & ITaskDraft;
+export type Task = TaskID & TaskDraft;
 
-export const toDraft = (task: ITask): ITaskDraft => {
+export const toDraft = (task: Task): TaskDraft => {
   const { id, ...draft } = task;
   return draft;
 };
 
-export type TaskID = IID;
-export interface IID {
+export type TaskID = ID;
+export interface ID {
   id: string;
 }
 
-export interface ITaskDraft {
+export interface TaskDraft {
   title: string;
   description: string;
   isActive: boolean;
 }
 
-export type ProjectID = IID;
-export type IProject = ProjectID & IProjectDraft;
-export interface IProjectDraft {
+export type ProjectID = ID;
+export type Project = ProjectID & ProjectDraft;
+export interface ProjectDraft {
   title: string;
   description: string;
 }

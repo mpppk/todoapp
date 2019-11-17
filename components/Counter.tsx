@@ -2,7 +2,7 @@ import Button from '@material-ui/core/Button/Button';
 import Typography from '@material-ui/core/Typography/Typography';
 import * as React from 'react';
 
-export interface ICounterProps {
+export interface CounterProps {
   count: number;
   onClickIncrementButton: (currentCount: number) => void;
   onClickDecrementButton: (currentCount: number) => void;
@@ -11,7 +11,7 @@ export interface ICounterProps {
 
 type ClickEvent = React.MouseEvent<HTMLElement, MouseEvent>;
 
-export default (props: ICounterProps) => {
+export default (props: CounterProps) => {
   const handleClickIncrementButton = (_e: ClickEvent) => {
     props.onClickIncrementButton(props.count);
   };
