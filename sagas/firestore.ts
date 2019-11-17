@@ -1,8 +1,8 @@
-import { call, put, take } from '@redux-saga/core/effects';
+import { call, put, take, takeEvery } from '@redux-saga/core/effects';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import { eventChannel } from 'redux-saga';
-import { AsyncActionCreators } from 'typescript-fsa';
+import { Action, AsyncActionCreators } from 'typescript-fsa';
 import { bindAsyncAction } from 'typescript-fsa-redux-saga';
 import { ICollectionActionCreator } from '../actions/firestore';
 
@@ -27,7 +27,7 @@ function* collectionSnapshotChannel(
   });
 }
 
-export function* watchCollectionSnapShot<Doc extends IDocBase>(
+function* watchCollectionSnapShot<Doc extends IDocBase>(
   actionCreators: ICollectionActionCreator<Doc>
 ) {
   const collection = firebase
@@ -168,4 +168,27 @@ export const bindFireStoreCollection = <Doc extends IDocBase>(
     ),
     remove: bindToRemoveDoc(selectors.remove, actionCreators.remove)
   };
+};
+
+export const takeEveryStartedAction = (
+  actionCreator: ICollectionActionCreator<any>,
+  workers: any
+) => {
+  return [
+    (function*() {
+      yield takeEvery(actionCreator.add.started, (action: Action<any>) =>
+        workers.add(action.payload)
+      );
+    })(),
+    (function*() {
+      yield takeEvery(actionCreator.modify.started, (action: Action<any>) =>
+        workers.modify(action.payload)
+      );
+    })(),
+    (function*() {
+      yield takeEvery(actionCreator.remove.started, (action: Action<any>) =>
+        workers.remove(action.payload)
+      );
+    })()
+  ];
 };
