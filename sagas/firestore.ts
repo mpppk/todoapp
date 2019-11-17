@@ -28,9 +28,11 @@ function* collectionSnapshotChannel(
 }
 
 export function* watchCollectionSnapShot<Doc extends IDocBase>(
-  collection: firebase.firestore.CollectionReference,
   actionCreators: ICollectionActionCreator<Doc>
 ) {
+  const collection = firebase
+    .firestore()
+    .collection(actionCreators.collectionPath);
   const chan = yield call(collectionSnapshotChannel, collection);
   try {
     const docChangeToDoc = (d: firebase.firestore.DocumentChange): Doc => {
@@ -156,19 +158,14 @@ export const bindFireStoreCollection = <Doc extends IDocBase>(
       remove: newDocSelector(actionCreators.collectionPath)
     };
   }
+
   return {
     add: bindToAddDoc(selectors.add, actionCreators.add),
     modify: bindToModifyDoc(selectors.modify, actionCreators.modify),
-    observe: () => {
-      const collection = firebase
-        .firestore()
-        .collection(actionCreators.collectionPath);
-      return watchCollectionSnapShot.bind(
-        watchCollectionSnapShot,
-        collection,
-        actionCreators as ICollectionActionCreator<any> // FIXME
-      );
-    },
+    observe: watchCollectionSnapShot.bind(
+      watchCollectionSnapShot,
+      actionCreators as ICollectionActionCreator<any> // FIXME
+    ),
     remove: bindToRemoveDoc(selectors.remove, actionCreators.remove)
   };
 };

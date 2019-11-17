@@ -1,19 +1,19 @@
-import { takeEvery } from '@redux-saga/core/effects';
+import { fork, take, takeEvery } from '@redux-saga/core/effects';
 import { Action } from 'typescript-fsa';
+import { sessionActionCreators } from '../actions/session';
 import { taskCollectionActionCreator } from '../actions/todo';
 import { bindFireStoreCollection } from './firestore';
 
 export const taskWorkers = bindFireStoreCollection(taskCollectionActionCreator);
 
-export function* watchAddDoc() {
-  // FIXME
+function* watchAddDoc() {
   yield takeEvery(
     taskCollectionActionCreator.add.started,
     (action: Action<any>) => taskWorkers.add(action.payload)
   );
 }
 
-export function* watchModifyDoc() {
+function* watchModifyDoc() {
   // FIXME
   yield takeEvery(
     taskCollectionActionCreator.modify.started,
@@ -21,12 +21,21 @@ export function* watchModifyDoc() {
   );
 }
 
-export function* watchRemoveDoc() {
-  // FIXME
+function* watchRemoveDoc() {
   yield takeEvery(
     taskCollectionActionCreator.remove.started,
     (action: Action<any>) => taskWorkers.remove(action.payload)
   );
 }
 
-export const taskWatchers = [watchAddDoc(), watchModifyDoc(), watchRemoveDoc()];
+export function* observe() {
+  yield take(sessionActionCreators.finishFirebaseInitializing);
+  yield fork(taskWorkers.observe);
+}
+
+export const taskWatchers = [
+  watchAddDoc(),
+  watchModifyDoc(),
+  watchRemoveDoc(),
+  observe()
+];
