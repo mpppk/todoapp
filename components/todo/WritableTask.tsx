@@ -10,16 +10,13 @@ import { Task } from '../../domain/todo';
 interface WritableTaskProps {
   onClickUpdateButton: (task: Task) => void;
   onClickCloseButton: (task: Task) => void;
-  id: string;
-  title: string;
-  description: string;
-  isActive: boolean;
+  task: Task;
 }
 
 // tslint:disable-next-line variable-name
 export const WritableTask = (props: WritableTaskProps) => {
-  const [title, setTitle] = useState(props.title);
-  const [description, setDescription] = useState(props.description);
+  const [title, setTitle] = useState(props.task.title);
+  const [description, setDescription] = useState(props.task.description);
 
   const handleChangeTitleInput: EventHandler<ChangeEvent> = e =>
     setTitle(e.target.value);
@@ -28,9 +25,8 @@ export const WritableTask = (props: WritableTaskProps) => {
 
   const handleClickUpdateButton: MouseEventHandler = () => {
     const currentTask: Task = {
+      ...props.task,
       description,
-      id: props.id,
-      isActive: props.isActive,
       title
     };
     props.onClickUpdateButton(currentTask);
@@ -38,9 +34,8 @@ export const WritableTask = (props: WritableTaskProps) => {
 
   const handleClickCloseButton: MouseEventHandler = () => {
     const currentTask: Task = {
+      ...props.task,
       description,
-      id: props.id,
-      isActive: props.isActive,
       title
     };
     props.onClickCloseButton(currentTask);

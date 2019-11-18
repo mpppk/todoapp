@@ -20,6 +20,7 @@ describe('Page', () => {
       editTaskId={'id'}
       onClickCloseTaskButton={emptyClickEventHandler}
       onClickUpdateTaskButton={emptyClickEventHandler}
+      projectId={'project_id'}
     />
   );
   it('has no Task', async () => {
@@ -36,6 +37,7 @@ describe('Page with task', () => {
       description: 'description',
       id: 'id',
       isActive: true,
+      projectId: 'project_id',
       title: 'title'
     }
   ];
@@ -51,6 +53,7 @@ describe('Page with task', () => {
       onClickEditTaskButton={emptyClickEventHandler}
       onClickCloseTaskButton={emptyClickEventHandler}
       onClickUpdateTaskButton={emptyClickEventHandler}
+      projectId={'project_id'}
     />
   );
   it('has one Task', async () => {
@@ -70,6 +73,7 @@ describe('Page with editable task', () => {
       description: 'description',
       id: 'id',
       isActive: true,
+      projectId: 'project_id',
       title: 'title'
     }
   ];
@@ -85,6 +89,7 @@ describe('Page with editable task', () => {
       onClickEditTaskButton={emptyClickEventHandler}
       onClickCloseTaskButton={emptyClickEventHandler}
       onClickUpdateTaskButton={emptyClickEventHandler}
+      projectId={'project_id'}
     />
   );
   it('has no Task', async () => {

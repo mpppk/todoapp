@@ -9,33 +9,23 @@ import { Task as TaskEntity } from '../../domain/todo';
 interface TaskProps {
   onClickDeleteButton: (task: TaskEntity) => void;
   onClickEditButton: (task: TaskEntity) => void;
-  id: string;
-  title: string;
-  description: string;
-  isActive: boolean;
+  task: TaskEntity;
 }
 
 // tslint:disable-next-line variable-name
 export const Task = (props: TaskProps) => {
-  const currentTask: TaskEntity = {
-    description: props.description,
-    id: props.id,
-    isActive: props.isActive,
-    title: props.title
-  };
-
   const handleClickEditButton: MouseEventHandler = () => {
-    props.onClickEditButton(currentTask);
+    props.onClickEditButton(props.task);
   };
 
   const handleClickDeleteButton: MouseEventHandler = () => {
-    props.onClickDeleteButton(currentTask);
+    props.onClickDeleteButton(props.task);
   };
 
   return (
     <Paper>
       <Typography variant="h5" component="h3">
-        {props.title}
+        {props.task.title}
         <IconButton onClick={handleClickEditButton}>
           <Edit />
         </IconButton>
@@ -43,7 +33,7 @@ export const Task = (props: TaskProps) => {
           <DeleteOutline />
         </IconButton>
       </Typography>
-      {props.description}
+      {props.task.description}
     </Paper>
   );
 };

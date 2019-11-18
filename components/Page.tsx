@@ -19,6 +19,7 @@ export interface PageProps {
   onClickNewTaskButton: (task: TaskDraft) => void;
   onClickCloseTaskButton: (task: TaskEntity) => void;
   onClickUpdateTaskButton: (task: TaskEntity) => void;
+  projectId: string;
 }
 
 export default function Page(props: PageProps) {
@@ -26,7 +27,12 @@ export default function Page(props: PageProps) {
   const [description, setDescription] = useState('');
 
   const handleClickNewTaskButton = (_e: ClickEvent) => {
-    props.onClickNewTaskButton({ title, description, isActive: true });
+    props.onClickNewTaskButton({
+      description,
+      isActive: true,
+      projectId: props.projectId,
+      title
+    });
     setTitle('');
     setDescription('');
   };
@@ -42,22 +48,16 @@ export default function Page(props: PageProps) {
         props.editTaskId === t.id ? (
           <WritableTask
             key={'writableTask_' + i}
-            id={t.id}
-            title={t.title}
-            description={t.description}
-            isActive={t.isActive}
             onClickCloseButton={props.onClickCloseTaskButton}
             onClickUpdateButton={props.onClickUpdateTaskButton}
+            task={t}
           />
         ) : (
           <Task
             key={'task_' + i}
-            title={t.title}
-            description={t.description}
-            id={t.id}
-            isActive={t.isActive}
             onClickDeleteButton={props.onClickDeleteTaskButton}
             onClickEditButton={props.onClickEditTaskButton}
+            task={t}
           />
         )
       )}
