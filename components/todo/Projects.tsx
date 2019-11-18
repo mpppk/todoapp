@@ -6,6 +6,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import MoreHoriz from '@material-ui/icons/MoreHorizOutlined';
+import Link from 'next/link';
 import { useState } from 'react';
 import * as React from 'react';
 import { Project, Project as ProjectEntity } from '../../domain/todo';
@@ -58,21 +59,27 @@ export const Projects = (props: ProjectsProps) => {
       <Typography variant={'h3'}>Projects</Typography>
       <List component="nav" aria-label="main mailbox folders">
         {props.projects.map(project => (
-          <ListItem
-            key={'project_list_' + project.id}
-            button={true}
-            onClick={generateClickProjectHandler(project)}
+          <Link
+            key={`project_link_${project.id}`}
+            href={'/projects/[id]'}
+            as={`/projects/${project.id}`}
           >
-            <ListItemText
-              primary={project.title}
-              secondary={project.description}
-            />
-            <ListItemSecondaryAction>
-              <IconButton onClick={generateClickMoreButtonHandler(project)}>
-                <MoreHoriz />
-              </IconButton>
-            </ListItemSecondaryAction>
-          </ListItem>
+            <ListItem
+              key={'project_list_' + project.id}
+              button={true}
+              onClick={generateClickProjectHandler(project)}
+            >
+              <ListItemText
+                primary={project.title}
+                secondary={project.description}
+              />
+              <ListItemSecondaryAction>
+                <IconButton onClick={generateClickMoreButtonHandler(project)}>
+                  <MoreHoriz />
+                </IconButton>
+              </ListItemSecondaryAction>
+            </ListItem>
+          </Link>
         ))}
       </List>
       <ProjectMenu

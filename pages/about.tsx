@@ -1,11 +1,35 @@
-import Typography from '@material-ui/core/Typography/Typography';
-import * as React from 'react';
+import { Typography } from '@material-ui/core';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { sessionActionCreators } from '../actions/session';
+import MyAppBar from '../components/AppBar';
+import { State } from '../reducer';
 
-export default () => (
-  <div>
-    // TODO: connect to redux and add AppBar
-    <Typography variant="h2" gutterBottom={true}>
-      About
-    </Typography>
-  </div>
-);
+const useHandlers = () => {
+  const dispatch = useDispatch();
+  return {
+    requestToInitializeFirebase: () => {
+      dispatch(sessionActionCreators.requestToInitializeFirebase());
+    },
+    requestToLogout: () => dispatch(sessionActionCreators.requestToLogout())
+  };
+};
+
+const useReduxState = () => {
+  const user = useSelector((state: State) => state.user);
+  return { user };
+};
+
+export default () => {
+  const handlers = useHandlers();
+  const state = useReduxState();
+
+  useEffect(handlers.requestToInitializeFirebase, []);
+
+  return (
+    <div>
+      <MyAppBar user={state.user} onClickLogout={handlers.requestToLogout} />
+      <Typography variant={'h3'}>About</Typography>
+    </div>
+  );
+};

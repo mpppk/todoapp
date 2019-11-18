@@ -14,6 +14,7 @@ export interface TaskDraft {
   title: string;
   description: string;
   isActive: boolean;
+  projectId: string;
 }
 
 export type ProjectID = ID;
