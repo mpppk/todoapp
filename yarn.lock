@@ -1342,11 +1342,21 @@
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/@types/minimatch/-/minimatch-3.0.3.tgz#3dca0e3f33b200fc7d1139c0cd96c1268cadfd9d"
 
-"@types/next-redux-saga@3.0.1":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@types/next-redux-saga/-/next-redux-saga-3.0.1.tgz#af118827c3e8efaa0a877e69ada5f38c81bee98a"
+"@types/next-redux-saga@3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@types/next-redux-saga/-/next-redux-saga-3.0.2.tgz#1440cabcfa1f979ccd52dd9e298fb53e0d39ed72"
   dependencies:
+    "@types/next-redux-wrapper" "^2.0.2"
     "@types/react" "*"
+    redux "^3.6.0"
+
+"@types/next-redux-wrapper@^2.0.2":
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@types/next-redux-wrapper/-/next-redux-wrapper-2.0.2.tgz#ab74f5988911b3403c4da91c6d7dabac4aa2f9fb"
+  dependencies:
+    "@types/node" "*"
+    "@types/react" "*"
+    "@types/react-redux" "*"
     redux "^3.6.0"
 
 "@types/node@*":
@@ -1371,7 +1381,7 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react-redux@7.1.5":
+"@types/react-redux@*", "@types/react-redux@7.1.5":
   version "7.1.5"
   resolved "https://registry.yarnpkg.com/@types/react-redux/-/react-redux-7.1.5.tgz#c7a528d538969250347aa53c52241051cf886bd3"
   dependencies:
