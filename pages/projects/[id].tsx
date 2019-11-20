@@ -3,7 +3,10 @@ import { useRouter } from 'next/router';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { sessionActionCreators } from '../../actions/session';
-import { todoActionCreators } from '../../actions/todo';
+import {
+  taskCollectionActionCreator,
+  todoActionCreators
+} from '../../actions/todo';
 import MyAppBar from '../../components/AppBar';
 import Page from '../../components/Page';
 import { Task, TaskDraft } from '../../domain/todo';
@@ -25,7 +28,9 @@ const useHandlers = () => {
     requestToInitializeFirebase: () => {
       dispatch(sessionActionCreators.requestToInitializeFirebase());
     },
-    requestToLogout: () => dispatch(sessionActionCreators.requestToLogout())
+    requestToLogout: () => dispatch(sessionActionCreators.requestToLogout()),
+    subscribeTask: (p: { projectId: string }) =>
+      dispatch(taskCollectionActionCreator.subscribe(p))
   };
 };
 
@@ -38,6 +43,7 @@ const useGlobalState = () => {
     return {
       disableNewTaskButton: !state.tasks,
       editTaskId: state.editTaskId,
+      isReadyFirebase: state.isReadyFirebase,
       project: projects.find(p => p.id === id)!,
       tasks: tasks.filter(t => t.projectId),
       user: state.user
@@ -49,6 +55,10 @@ export default function Post() {
   const handlers = useHandlers();
   const state = useGlobalState();
   useEffect(handlers.requestToInitializeFirebase, []);
+  useEffect(() => {
+    handlers.subscribeTask({ projectId: state.project.id });
+  }, [state.isReadyFirebase]);
+
   if (!state.project) {
     return (
       <div>

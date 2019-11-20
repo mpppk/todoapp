@@ -25,6 +25,7 @@ const useHandlers = () => {
 
 const selector = (state: State) => {
   return {
+    isReadyFirebase: state.isReadyFirebase,
     projects: state.projects ? state.projects : [],
     user: state.user
   };

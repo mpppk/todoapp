@@ -135,16 +135,24 @@ interface Selectors<Doc> {
   remove: DocSelector<Doc>;
 }
 
-const newDocSelector = (collectionPath: string) => {
-  return (db: firebase.firestore.Firestore, docBase: DocBase) => {
-    return db.collection(collectionPath).doc(docBase.id);
-  };
-};
-
-const newCollectionSelector = (collectionPath: string) => {
-  return (db: firebase.firestore.Firestore) => {
-    return db.collection(collectionPath);
-  };
+// TODO: write test
+const parseCollectionPath = <Doc extends { [key: string]: any }>(
+  collectionPath: string,
+  param: Doc
+): string => {
+  return collectionPath
+    .split('/')
+    .map(collection => {
+      const v = collection.match(/{.+?}/);
+      if (!v || !param.hasOwnProperty(v[0])) {
+        return collection;
+      }
+      if (!['number', 'string'].includes(typeof param[v[0]])) {
+        return collection;
+      }
+      return v && param.hasOwnProperty(v[0]) ? param[v[0]] : collection;
+    })
+    .join('/');
 };
 
 export const bindFireStoreCollection = <Doc extends DocBase>(
@@ -152,6 +160,21 @@ export const bindFireStoreCollection = <Doc extends DocBase>(
   selectors?: Selectors<Doc>
 ) => {
   if (!selectors) {
+    const newDocSelector = (collectionPath: string) => {
+      return (db: firebase.firestore.Firestore, docBase: DocBase) => {
+        return db.collection(collectionPath).doc(docBase.id);
+      };
+    };
+
+    const newCollectionSelector = (collectionPath: string) => {
+      return (
+        db: firebase.firestore.Firestore,
+        params: DocWithOutBase<Doc>
+      ) => {
+        const parsedPath = parseCollectionPath(collectionPath, params);
+        return db.collection(parsedPath);
+      };
+    };
     selectors = {
       add: newCollectionSelector(actionCreators.collectionPath),
       modify: newDocSelector(actionCreators.collectionPath),

@@ -11,6 +11,9 @@ import {
   UpdateDocParam
 } from '../sagas/firestore';
 
+export interface SubscribeActionPayload {
+  [key: string]: string | number;
+}
 export interface CollectionActionCreator<Doc extends DocBase> {
   add: AsyncActionCreators<
     AddDocParam<DocWithOutBase<Doc>, DocWithOutBase<Doc>>,
@@ -25,34 +28,48 @@ export interface CollectionActionCreator<Doc extends DocBase> {
   added: ActionCreator<Doc[]>;
   modified: ActionCreator<Doc[]>;
   removed: ActionCreator<Doc[]>;
+  subscribe: ActionCreator<SubscribeActionPayload>;
+  unsubscribe: ActionCreator<SubscribeActionPayload>;
 }
 
 export const firebaseActionCreatorFactory = (prefix: string) => {
   const factory = actionCreatorFactory(prefix);
+
+  const collectionActionCreator = <Doc extends DocBase>(
+    collectionPath: string
+  ): CollectionActionCreator<Doc> => {
+    const eventPrefix = collectionPath.toUpperCase();
+
+    const add = factory.async<
+      AddDocParam<DocWithOutBase<Doc>>,
+      firebase.firestore.DocumentReference
+    >(`${eventPrefix}_ADD`);
+
+    const modify = factory.async<
+      UpdateDocParam<Doc>,
+      firebase.firestore.DocumentReference
+    >(`${eventPrefix}_MODIFY`);
+
+    const remove = factory.async<Doc, firebase.firestore.DocumentReference>(
+      `${eventPrefix}_REMOVE`
+    );
+
+    return {
+      add,
+      added: factory<Doc[]>(`${eventPrefix}_ADDED`),
+      collectionPath,
+      modified: factory<Doc[]>(`${eventPrefix}_MODIFIED`),
+      modify,
+      remove,
+      removed: factory<Doc[]>(`${eventPrefix}_REMOVED`),
+      subscribe: factory<SubscribeActionPayload>(`${eventPrefix}_SUBSCRIBE`),
+      unsubscribe: factory<SubscribeActionPayload>(`${eventPrefix}_UNSUBSCRIBE`)
+    };
+  };
+
   return {
     firestore: {
-      collection: <Doc extends DocBase>(
-        collectionPath: string
-      ): CollectionActionCreator<Doc> => {
-        const eventPrefix = collectionPath.toUpperCase();
-        return {
-          add: factory.async<
-            AddDocParam<DocWithOutBase<Doc>>,
-            firebase.firestore.DocumentReference
-          >(`${eventPrefix}_ADD`),
-          added: factory<Doc[]>(`${eventPrefix}_ADDED`),
-          collectionPath,
-          modified: factory<Doc[]>(`${eventPrefix}_MODIFIED`),
-          modify: factory.async<
-            UpdateDocParam<Doc>,
-            firebase.firestore.DocumentReference
-          >(`${eventPrefix}_MODIFY`),
-          remove: factory.async<Doc, firebase.firestore.DocumentReference>(
-            `${eventPrefix}_REMOVE`
-          ),
-          removed: factory<Doc[]>(`${eventPrefix}_REMOVED`)
-        };
-      }
+      collection: collectionActionCreator
     }
   };
 };
