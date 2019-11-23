@@ -1,7 +1,10 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { sessionActionCreators } from '../actions/session';
-import { todoActionCreators } from '../actions/todo';
+import {
+  projectCollectionActionCreator,
+  todoActionCreators
+} from '../actions/todo';
 import MyAppBar from '../components/AppBar';
 import { Projects } from '../components/todo/Projects';
 import { Project } from '../domain/todo';
@@ -19,7 +22,9 @@ const useHandlers = () => {
     requestToInitializeFirebase: () => {
       dispatch(sessionActionCreators.requestToInitializeFirebase());
     },
-    requestToLogout: () => dispatch(sessionActionCreators.requestToLogout())
+    requestToLogout: () => dispatch(sessionActionCreators.requestToLogout()),
+    subscribeProjects: () =>
+      dispatch(projectCollectionActionCreator.subscribe({}))
   };
 };
 
@@ -36,6 +41,9 @@ export default () => {
   const state = useSelector(selector);
 
   useEffect(handlers.requestToInitializeFirebase, []);
+  useEffect(() => {
+    handlers.subscribeProjects();
+  }, [state.isReadyFirebase]);
 
   return (
     <div>

@@ -5,11 +5,11 @@ import {
   todoActionCreators
 } from '../actions/todo';
 import { Task, TaskDraft } from '../domain/todo';
-import { AddDocParam } from './firestore';
+import { DocParam } from './firestore';
 
 function* watchClickNewTaskButton() {
   function* worker(action: Action<TaskDraft>) {
-    const param: AddDocParam<TaskDraft> = {
+    const param: DocParam<TaskDraft> = {
       doc: action.payload,
       selectorParam: action.payload
     };

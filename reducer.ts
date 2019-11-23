@@ -1,4 +1,5 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
+import { SnapshotEventPayload } from './actions/firestore';
 import { sessionActionCreators } from './actions/session';
 import {
   projectCollectionActionCreator,
@@ -37,25 +38,30 @@ const reducer = reducerWithInitialState(exampleInitialState)
   .case(todoActionCreators.clickCloseTaskButton, state => {
     return { ...state, editTaskId: null };
   })
-  .case(taskCollectionActionCreator.added, (state, tasks: Task[]) => {
-    const beforeTasks = state.tasks ? state.tasks : [];
-    return { ...state, tasks: [...beforeTasks, ...tasks] };
-  })
-  .case(projectCollectionActionCreator.added, (state, projects: Project[]) => {
+  .case(
+    taskCollectionActionCreator.added,
+    (state, payload: SnapshotEventPayload<Task>) => {
+      const beforeTasks = state.tasks ? state.tasks : [];
+      return { ...state, tasks: [...beforeTasks, ...payload.docs] };
+    }
+  )
+  .case(projectCollectionActionCreator.added, (state, projects) => {
     const beforeProjects = state.projects ? state.projects : [];
-    return { ...state, projects: [...beforeProjects, ...projects] };
+    return { ...state, projects: [...beforeProjects, ...projects.docs] };
   })
-  .case(taskCollectionActionCreator.modified, (state, tasks: Task[]) => {
+  .case(taskCollectionActionCreator.modified, (state, payload) => {
     const beforeTasks = state.tasks ? state.tasks : [];
     const newTasks = beforeTasks.map(beforeTask => {
-      const task = tasks.find(b => b.id === beforeTask.id);
+      const task = payload.docs.find(b => b.id === beforeTask.id);
       return task ? task : beforeTask;
     });
     return { ...state, tasks: newTasks };
   })
-  .case(taskCollectionActionCreator.removed, (state, tasks: Task[]) => {
+  .case(taskCollectionActionCreator.removed, (state, payload) => {
     const beforeTasks = state.tasks ? state.tasks : [];
-    const newTasks = beforeTasks.filter(bt => !tasks.find(t => bt.id === t.id));
+    const newTasks = beforeTasks.filter(
+      bt => !payload.docs.find(t => bt.id === t.id)
+    );
     return { ...state, tasks: newTasks };
   })
   .case(sessionActionCreators.finishFirebaseInitializing, state => {

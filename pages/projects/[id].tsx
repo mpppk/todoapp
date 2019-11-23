@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { sessionActionCreators } from '../../actions/session';
 import {
+  projectCollectionActionCreator,
   taskCollectionActionCreator,
   todoActionCreators
 } from '../../actions/todo';
@@ -29,6 +30,8 @@ const useHandlers = () => {
       dispatch(sessionActionCreators.requestToInitializeFirebase());
     },
     requestToLogout: () => dispatch(sessionActionCreators.requestToLogout()),
+    subscribeProject: () =>
+      dispatch(projectCollectionActionCreator.subscribe({})),
     subscribeTask: (p: { projectId: string }) =>
       dispatch(taskCollectionActionCreator.subscribe(p))
   };
@@ -45,7 +48,8 @@ const useGlobalState = () => {
       editTaskId: state.editTaskId,
       isReadyFirebase: state.isReadyFirebase,
       project: projects.find(p => p.id === id)!,
-      tasks: tasks.filter(t => t.projectId),
+      tasks,
+      // tasks: tasks.filter(t => t.projectId),
       user: state.user
     };
   });
@@ -56,8 +60,13 @@ export default function Post() {
   const state = useGlobalState();
   useEffect(handlers.requestToInitializeFirebase, []);
   useEffect(() => {
-    handlers.subscribeTask({ projectId: state.project.id });
+    handlers.subscribeProject();
   }, [state.isReadyFirebase]);
+  useEffect(() => {
+    if (state.project && state.project.id) {
+      handlers.subscribeTask({ projectId: state.project.id });
+    }
+  }, [state.project]);
 
   if (!state.project) {
     return (
@@ -67,6 +76,8 @@ export default function Post() {
       </div>
     );
   }
+
+  console.log('[id] state', state);
 
   return (
     <div>

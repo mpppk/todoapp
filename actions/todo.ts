@@ -32,5 +32,5 @@ export const projectCollectionActionCreator = fbFactory.firestore.collection<
   Project
 >('projects');
 export const taskCollectionActionCreator = fbFactory.firestore.collection<Task>(
-  'tasks'
+  'projects/{projectId}/tasks'
 );
