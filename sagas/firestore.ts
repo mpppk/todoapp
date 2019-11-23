@@ -4,6 +4,7 @@ import {
   cancel,
   fork,
   put,
+  select,
   take,
   takeEvery
 } from '@redux-saga/core/effects';
@@ -17,6 +18,7 @@ import {
   CollectionActionCreator,
   SubscribeActionPayload
 } from '../actions/firestore';
+import { State } from '../reducer';
 
 export interface DocBase {
   id: string;
@@ -24,27 +26,25 @@ export interface DocBase {
 
 export type DocWithOutBase<Doc> = Omit<Doc, keyof DocBase>;
 
-function* collectionSnapshotChannel(
-  collection: firebase.firestore.CollectionReference
-) {
+function* querySnapshotChannel(query: firebase.firestore.Query) {
   return eventChannel(emit => {
-    collection.onSnapshot((snapshot: firebase.firestore.QuerySnapshot) => {
+    query.onSnapshot((snapshot: firebase.firestore.QuerySnapshot) => {
       emit(snapshot.docChanges());
     });
-
-    const unsubscribe = collection.onSnapshot(() => {
-      /****/
-    });
-    return () => unsubscribe();
+    return () => {
+      query.onSnapshot(() => {
+        /****/
+      });
+    };
   });
 }
 
-function* watchCollectionSnapShot<Doc extends DocBase>(
+function* watchQuerySnapShot<Doc extends DocBase>(
   actionCreators: CollectionActionCreator<Doc>,
-  collection: firebase.firestore.CollectionReference,
+  query: firebase.firestore.Query,
   payload: SubscribeActionPayload
 ) {
-  const chan = yield call(collectionSnapshotChannel, collection);
+  const chan = yield call(querySnapshotChannel, query);
   try {
     const docChangeToDoc = (d: firebase.firestore.DocumentChange): Doc => {
       return { id: d.doc.id, ...d.doc.data() } as Doc;
@@ -85,6 +85,12 @@ export type CollectionSelector = (
   db: firebase.firestore.Firestore,
   param: SubscribeActionPayload
 ) => firebase.firestore.CollectionReference;
+
+export type QueryBuilder<Context> = (
+  context: Context,
+  state: State,
+  collection: firebase.firestore.CollectionReference
+) => firebase.firestore.Query;
 
 export interface DocParam<DocWithOutID> {
   doc: DocWithOutID;
@@ -174,8 +180,19 @@ const generateDocSelector = (collectionPath: string) => {
   };
 };
 
+const generateBypassQueryBuilder = <Context>() => {
+  return (
+    _context: Context,
+    _state: State,
+    collection: firebase.firestore.CollectionReference
+  ) => collection;
+};
+
 export const bindFireStoreCollection = <Doc extends DocBase>(
   actionCreators: CollectionActionCreator<Doc>,
+  queryBuilder: QueryBuilder<
+    SubscribeActionPayload
+  > = generateBypassQueryBuilder(),
   collectionSelector: CollectionSelector = generateCollectionSelector(
     actionCreators.collectionPath
   )
@@ -183,28 +200,25 @@ export const bindFireStoreCollection = <Doc extends DocBase>(
   function* observe() {
     const subscriptions: Array<[Task, SubscribeActionPayload]> = [];
 
-    function* subscribeWorker(action: Action<SubscribeActionPayload>) {
-      const payload = action.payload;
+    function* subscribeWorker(payload: SubscribeActionPayload) {
       if (subscriptions.find(s => _.isEqual(s[1], payload))) {
         return;
       }
 
-      const collection = collectionSelector(
-        firebase.firestore(),
-        action.payload
-      ); // FIXME
-      const w = watchCollectionSnapShot.bind(
-        watchCollectionSnapShot,
+      const collection = collectionSelector(firebase.firestore(), payload); // FIXME
+
+      const state = yield select();
+      const w = watchQuerySnapShot.bind(
+        watchQuerySnapShot,
         actionCreators as CollectionActionCreator<any>, // FIXME
-        collection,
-        action.payload
+        queryBuilder(payload, state, collection),
+        payload
       );
       const task = yield fork(w);
       subscriptions.push([task, payload]);
     }
 
-    function* unsubscribeWorker(action: Action<SubscribeActionPayload>) {
-      const payload = action.payload;
+    function* unsubscribeWorker(payload: SubscribeActionPayload) {
       const index = subscriptions.findIndex(s => _.isEqual(s[1], payload));
       if (index === -1) {
         return;
@@ -214,12 +228,27 @@ export const bindFireStoreCollection = <Doc extends DocBase>(
       yield cancel(subscription[0]);
     }
 
+    const subscribeWorker2 = bindAsyncAction(actionCreators.subscribe, {
+      skipStartedAction: true
+    })(subscribeWorker);
+    const unsubscribeWorker2 = bindAsyncAction(actionCreators.unsubscribe, {
+      skipStartedAction: true
+    })(unsubscribeWorker);
+
     yield all([
       (function*() {
-        yield takeEvery(actionCreators.subscribe.type, subscribeWorker);
+        function* worker(action: Action<SubscribeActionPayload>) {
+          yield subscribeWorker2(action.payload);
+        }
+
+        yield takeEvery(actionCreators.subscribe.started.type, worker);
       })(),
       (function*() {
-        yield takeEvery(actionCreators.unsubscribe.type, unsubscribeWorker);
+        function* worker(action: Action<SubscribeActionPayload>) {
+          yield unsubscribeWorker2(action.payload);
+        }
+
+        yield takeEvery(actionCreators.unsubscribe.started.type, worker);
       })()
     ]);
   }

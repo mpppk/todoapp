@@ -24,7 +24,10 @@ const useHandlers = () => {
     },
     requestToLogout: () => dispatch(sessionActionCreators.requestToLogout()),
     subscribeProjects: () =>
-      dispatch(projectCollectionActionCreator.subscribe({}))
+      dispatch(projectCollectionActionCreator.subscribe.started({})),
+    unsubscribeProjects: () => {
+      dispatch(projectCollectionActionCreator.unsubscribe.started({}));
+    }
   };
 };
 
@@ -42,8 +45,11 @@ export default () => {
 
   useEffect(handlers.requestToInitializeFirebase, []);
   useEffect(() => {
-    handlers.subscribeProjects();
-  }, [state.isReadyFirebase]);
+    if (state.isReadyFirebase && state.user) {
+      handlers.subscribeProjects();
+    }
+    return handlers.unsubscribeProjects;
+  }, [state.isReadyFirebase, state.user]);
 
   return (
     <div>

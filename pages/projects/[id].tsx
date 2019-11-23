@@ -31,9 +31,9 @@ const useHandlers = () => {
     },
     requestToLogout: () => dispatch(sessionActionCreators.requestToLogout()),
     subscribeProject: () =>
-      dispatch(projectCollectionActionCreator.subscribe({})),
+      dispatch(projectCollectionActionCreator.subscribe.started({})),
     subscribeTask: (p: { projectId: string }) =>
-      dispatch(taskCollectionActionCreator.subscribe(p))
+      dispatch(taskCollectionActionCreator.subscribe.started(p))
   };
 };
 
@@ -60,8 +60,10 @@ export default function Post() {
   const state = useGlobalState();
   useEffect(handlers.requestToInitializeFirebase, []);
   useEffect(() => {
-    handlers.subscribeProject();
-  }, [state.isReadyFirebase]);
+    if (state.isReadyFirebase && state.user) {
+      handlers.subscribeProject();
+    }
+  }, [state.isReadyFirebase, state.user]);
   useEffect(() => {
     if (state.project && state.project.id) {
       handlers.subscribeTask({ projectId: state.project.id });
@@ -76,8 +78,6 @@ export default function Post() {
       </div>
     );
   }
-
-  console.log('[id] state', state);
 
   return (
     <div>

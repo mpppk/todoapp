@@ -31,8 +31,8 @@ export interface CollectionActionCreator<Doc extends DocBase> {
   added: ActionCreator<SnapshotEventPayload<Doc>>;
   modified: ActionCreator<SnapshotEventPayload<Doc>>;
   removed: ActionCreator<SnapshotEventPayload<Doc>>;
-  subscribe: ActionCreator<SubscribeActionPayload>;
-  unsubscribe: ActionCreator<SubscribeActionPayload>;
+  subscribe: AsyncActionCreators<SubscribeActionPayload, undefined>;
+  unsubscribe: AsyncActionCreators<SubscribeActionPayload, undefined>;
 }
 
 export const firebaseActionCreatorFactory = (prefix: string) => {
@@ -66,8 +66,12 @@ export const firebaseActionCreatorFactory = (prefix: string) => {
       modify,
       remove,
       removed: factory<SnapshotEventPayload<Doc>>(`${eventPrefix}_REMOVED`),
-      subscribe: factory<SubscribeActionPayload>(`${eventPrefix}_SUBSCRIBE`),
-      unsubscribe: factory<SubscribeActionPayload>(`${eventPrefix}_UNSUBSCRIBE`)
+      subscribe: factory.async<SubscribeActionPayload, undefined>(
+        `${eventPrefix}_SUBSCRIBE`
+      ),
+      unsubscribe: factory.async<SubscribeActionPayload, undefined>(
+        `${eventPrefix}_UNSUBSCRIBE`
+      )
     };
   };
 
