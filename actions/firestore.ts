@@ -4,55 +4,80 @@ import actionCreatorFactory, {
   ActionCreator,
   AsyncActionCreators
 } from 'typescript-fsa';
-import {
-  AddDocParam,
-  DocBase,
-  DocWithOutBase,
-  UpdateDocParam
-} from '../sagas/firestore';
+import { DocBase, DocParam, DocWithOutBase } from '../sagas/firestore';
+
+// tslint:disable-next-line
+export type SubscribeActionPayload = {};
+
+export interface SnapshotEventPayload<Doc> {
+  payload: SubscribeActionPayload;
+  docs: Doc[];
+}
 
 export interface CollectionActionCreator<Doc extends DocBase> {
   add: AsyncActionCreators<
-    AddDocParam<DocWithOutBase<Doc>, DocWithOutBase<Doc>>,
+    DocParam<DocWithOutBase<Doc>>,
     firebase.firestore.DocumentReference
   >;
   collectionPath: string;
   modify: AsyncActionCreators<
-    UpdateDocParam<Doc>,
+    DocParam<Doc>,
     firebase.firestore.DocumentReference
   >;
-  remove: AsyncActionCreators<Doc, firebase.firestore.DocumentReference>;
-  added: ActionCreator<Doc[]>;
-  modified: ActionCreator<Doc[]>;
-  removed: ActionCreator<Doc[]>;
+  remove: AsyncActionCreators<
+    SubscribeActionPayload,
+    firebase.firestore.DocumentReference
+  >;
+  added: ActionCreator<SnapshotEventPayload<Doc>>;
+  modified: ActionCreator<SnapshotEventPayload<Doc>>;
+  removed: ActionCreator<SnapshotEventPayload<Doc>>;
+  subscribe: AsyncActionCreators<SubscribeActionPayload, undefined>;
+  unsubscribe: AsyncActionCreators<SubscribeActionPayload, undefined>;
 }
 
 export const firebaseActionCreatorFactory = (prefix: string) => {
   const factory = actionCreatorFactory(prefix);
+
+  const collectionActionCreator = <Doc extends DocBase>(
+    collectionPath: string
+  ): CollectionActionCreator<Doc> => {
+    const eventPrefix = collectionPath.toUpperCase();
+
+    const add = factory.async<
+      DocParam<DocWithOutBase<Doc>>,
+      firebase.firestore.DocumentReference
+    >(`${eventPrefix}_ADD`);
+
+    const modify = factory.async<
+      DocParam<Doc>,
+      firebase.firestore.DocumentReference
+    >(`${eventPrefix}_MODIFY`);
+
+    const remove = factory.async<
+      SubscribeActionPayload,
+      firebase.firestore.DocumentReference
+    >(`${eventPrefix}_REMOVE`);
+
+    return {
+      add,
+      added: factory<SnapshotEventPayload<Doc>>(`${eventPrefix}_ADDED`),
+      collectionPath,
+      modified: factory<SnapshotEventPayload<Doc>>(`${eventPrefix}_MODIFIED`),
+      modify,
+      remove,
+      removed: factory<SnapshotEventPayload<Doc>>(`${eventPrefix}_REMOVED`),
+      subscribe: factory.async<SubscribeActionPayload, undefined>(
+        `${eventPrefix}_SUBSCRIBE`
+      ),
+      unsubscribe: factory.async<SubscribeActionPayload, undefined>(
+        `${eventPrefix}_UNSUBSCRIBE`
+      )
+    };
+  };
+
   return {
     firestore: {
-      collection: <Doc extends DocBase>(
-        collectionPath: string
-      ): CollectionActionCreator<Doc> => {
-        const eventPrefix = collectionPath.toUpperCase();
-        return {
-          add: factory.async<
-            AddDocParam<DocWithOutBase<Doc>>,
-            firebase.firestore.DocumentReference
-          >(`${eventPrefix}_ADD`),
-          added: factory<Doc[]>(`${eventPrefix}_ADDED`),
-          collectionPath,
-          modified: factory<Doc[]>(`${eventPrefix}_MODIFIED`),
-          modify: factory.async<
-            UpdateDocParam<Doc>,
-            firebase.firestore.DocumentReference
-          >(`${eventPrefix}_MODIFY`),
-          remove: factory.async<Doc, firebase.firestore.DocumentReference>(
-            `${eventPrefix}_REMOVE`
-          ),
-          removed: factory<Doc[]>(`${eventPrefix}_REMOVED`)
-        };
-      }
+      collection: collectionActionCreator
     }
   };
 };

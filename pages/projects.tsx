@@ -1,7 +1,10 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { sessionActionCreators } from '../actions/session';
-import { todoActionCreators } from '../actions/todo';
+import {
+  projectCollectionActionCreator,
+  todoActionCreators
+} from '../actions/todo';
 import MyAppBar from '../components/AppBar';
 import { Projects } from '../components/todo/Projects';
 import { Project } from '../domain/todo';
@@ -19,12 +22,18 @@ const useHandlers = () => {
     requestToInitializeFirebase: () => {
       dispatch(sessionActionCreators.requestToInitializeFirebase());
     },
-    requestToLogout: () => dispatch(sessionActionCreators.requestToLogout())
+    requestToLogout: () => dispatch(sessionActionCreators.requestToLogout()),
+    subscribeProjects: () =>
+      dispatch(projectCollectionActionCreator.subscribe.started({})),
+    unsubscribeProjects: () => {
+      dispatch(projectCollectionActionCreator.unsubscribe.started({}));
+    }
   };
 };
 
 const selector = (state: State) => {
   return {
+    isReadyFirebase: state.isReadyFirebase,
     projects: state.projects ? state.projects : [],
     user: state.user
   };
@@ -35,6 +44,12 @@ export default () => {
   const state = useSelector(selector);
 
   useEffect(handlers.requestToInitializeFirebase, []);
+  useEffect(() => {
+    if (state.isReadyFirebase && state.user) {
+      handlers.subscribeProjects();
+    }
+    return handlers.unsubscribeProjects;
+  }, [state.isReadyFirebase, state.user]);
 
   return (
     <div>
