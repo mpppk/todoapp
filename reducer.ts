@@ -8,11 +8,15 @@ import {
 } from './actions/todo';
 import { Project, Task } from './domain/todo';
 
-export const exampleInitialState = {
+interface Tasks {
+  [key: string]: Task[];
+}
+
+export const initialState = {
   editTaskId: null as string | null,
   isReadyFirebase: false,
   projects: null as Project[] | null,
-  tasks: null as Task[] | null,
+  tasks: null as Tasks | null,
   user: null as User | null
 };
 
@@ -26,9 +30,9 @@ export interface User {
   uid: string;
 }
 
-export type State = typeof exampleInitialState;
+export type State = typeof initialState;
 
-const reducer = reducerWithInitialState(exampleInitialState)
+const reducer = reducerWithInitialState(initialState)
   .case(todoActionCreators.clickEditTaskButton, (state, task) => {
     return { ...state, editTaskId: task.id };
   })
@@ -41,8 +45,13 @@ const reducer = reducerWithInitialState(exampleInitialState)
   .case(
     taskCollectionActionCreator.added,
     (state, payload: SnapshotEventPayload<Task>) => {
-      const beforeTasks = state.tasks ? state.tasks : [];
-      return { ...state, tasks: [...beforeTasks, ...payload.docs] };
+      const newTasks = payload.docs.reduce((acc, task) => {
+        const currentTaskList = acc[task.projectId] ? acc[task.projectId] : [];
+        acc[task.projectId] = [...currentTaskList, task];
+        return acc;
+      }, {} as Tasks);
+      const currentTasks = state.tasks ? state.tasks : {};
+      return { ...state, tasks: { ...currentTasks, ...newTasks } };
     }
   )
   .case(projectCollectionActionCreator.added, (state, projects) => {
@@ -50,19 +59,40 @@ const reducer = reducerWithInitialState(exampleInitialState)
     return { ...state, projects: [...beforeProjects, ...projects.docs] };
   })
   .case(taskCollectionActionCreator.modified, (state, payload) => {
-    const beforeTasks = state.tasks ? state.tasks : [];
-    const newTasks = beforeTasks.map(beforeTask => {
-      const task = payload.docs.find(b => b.id === beforeTask.id);
-      return task ? task : beforeTask;
-    });
-    return { ...state, tasks: newTasks };
+    if (!state.tasks) {
+      return { ...state };
+    }
+    const tasks = payload.docs.reduce(
+      (acc, task) => {
+        const projectTasks = acc[task.projectId] ? acc[task.projectId] : [];
+        const index = projectTasks.findIndex(t => t.id === task.id);
+        if (index === -1) {
+          return acc;
+        }
+        acc[task.projectId] = projectTasks.splice(index, 1, task);
+        return acc;
+      },
+      { ...state.tasks } as Tasks
+    );
+    return { ...state, tasks };
   })
   .case(taskCollectionActionCreator.removed, (state, payload) => {
-    const beforeTasks = state.tasks ? state.tasks : [];
-    const newTasks = beforeTasks.filter(
-      bt => !payload.docs.find(t => bt.id === t.id)
+    if (!state.tasks) {
+      return { ...state };
+    }
+    const tasks = payload.docs.reduce(
+      (acc, task) => {
+        const projectTasks = acc[task.projectId] ? acc[task.projectId] : [];
+        const index = projectTasks.findIndex(t => t.id === task.id);
+        if (index === -1) {
+          return acc;
+        }
+        acc[task.projectId] = projectTasks.splice(index, 1);
+        return acc;
+      },
+      { ...state.tasks } as Tasks
     );
-    return { ...state, tasks: newTasks };
+    return { ...state, tasks };
   })
   .case(sessionActionCreators.finishFirebaseInitializing, state => {
     return { ...state, isReadyFirebase: true };

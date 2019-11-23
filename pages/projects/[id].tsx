@@ -42,12 +42,16 @@ const useGlobalState = () => {
   const id = router.query.id;
   return useSelector((state: State) => {
     const projects = state.projects ? state.projects : [];
-    const tasks = state.tasks ? state.tasks : [];
+    const project = projects.find(p => p.id === id);
+    const tasks =
+      state.tasks && project && state.tasks[project.id]
+        ? state.tasks[project.id]
+        : [];
     return {
       disableNewTaskButton: !state.tasks,
       editTaskId: state.editTaskId,
       isReadyFirebase: state.isReadyFirebase,
-      project: projects.find(p => p.id === id)!,
+      project,
       tasks,
       // tasks: tasks.filter(t => t.projectId),
       user: state.user
