@@ -76,7 +76,7 @@ function* watchCollectionSnapShot<Doc extends DocBase>(
   } // tslint:disable-line
 }
 
-export type DocSelector = (
+type DocSelector = (
   db: firebase.firestore.Firestore,
   param: SubscribeActionPayload
 ) => firebase.firestore.DocumentReference;
@@ -134,11 +134,6 @@ const bindToRemoveDoc = <Result, Error>(
   });
 };
 
-interface Selectors {
-  collection: CollectionSelector;
-  doc: DocSelector;
-}
-
 export const parseCollectionPath = <Doc extends { [key: string]: any }>(
   collectionPath: string,
   param: Doc
@@ -161,40 +156,30 @@ export const parseCollectionPath = <Doc extends { [key: string]: any }>(
 
 type Task = any; // FIXME
 
+const generateCollectionSelector = (collectionPath: string) => {
+  return (db: firebase.firestore.Firestore, params: SubscribeActionPayload) => {
+    const parsedPath = parseCollectionPath(collectionPath, params);
+    return db.collection(parsedPath);
+  };
+};
+
+const generateDocSelector = (collectionPath: string) => {
+  return (db: firebase.firestore.Firestore, params: SubscribeActionPayload) => {
+    const parsedPath = parseCollectionPath(collectionPath, params);
+    if (!params.hasOwnProperty('id')) {
+      throw Error('doc param does not have id. ' + params);
+    }
+    // FIXME any
+    return db.collection(parsedPath).doc((params as any).id);
+  };
+};
+
 export const bindFireStoreCollection = <Doc extends DocBase>(
   actionCreators: CollectionActionCreator<Doc>,
-  selectors?: Selectors
+  collectionSelector: CollectionSelector = generateCollectionSelector(
+    actionCreators.collectionPath
+  )
 ) => {
-  if (!selectors) {
-    const newDocSelector = (collectionPath: string) => {
-      return (
-        db: firebase.firestore.Firestore,
-        params: SubscribeActionPayload
-      ) => {
-        const parsedPath = parseCollectionPath(collectionPath, params);
-        if (!params.hasOwnProperty('id')) {
-          throw Error('doc param does not have id. ' + params);
-        }
-        // FIXME any
-        return db.collection(parsedPath).doc((params as any).id);
-      };
-    };
-
-    const newCollectionSelector = (collectionPath: string) => {
-      return (
-        db: firebase.firestore.Firestore,
-        params: SubscribeActionPayload
-      ) => {
-        const parsedPath = parseCollectionPath(collectionPath, params);
-        return db.collection(parsedPath);
-      };
-    };
-    selectors = {
-      collection: newCollectionSelector(actionCreators.collectionPath),
-      doc: newDocSelector(actionCreators.collectionPath)
-    };
-  }
-
   function* observe() {
     const subscriptions: Array<[Task, SubscribeActionPayload]> = [];
 
@@ -204,7 +189,7 @@ export const bindFireStoreCollection = <Doc extends DocBase>(
         return;
       }
 
-      const collection = selectors!.collection(
+      const collection = collectionSelector(
         firebase.firestore(),
         action.payload
       ); // FIXME
@@ -239,11 +224,12 @@ export const bindFireStoreCollection = <Doc extends DocBase>(
     ]);
   }
 
+  const docSelector = generateDocSelector(actionCreators.collectionPath);
   return {
-    add: bindToAddDoc(selectors.collection, actionCreators.add),
-    modify: bindToModifyDoc(selectors.doc, actionCreators.modify),
+    add: bindToAddDoc(collectionSelector, actionCreators.add),
+    modify: bindToModifyDoc(docSelector, actionCreators.modify),
     observe,
-    remove: bindToRemoveDoc(selectors.doc, actionCreators.remove)
+    remove: bindToRemoveDoc(docSelector, actionCreators.remove)
   };
 };
 
