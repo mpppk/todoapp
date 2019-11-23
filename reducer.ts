@@ -32,6 +32,55 @@ export interface User {
 
 export type State = typeof initialState;
 
+const replaceTasks = (
+  state: State,
+  payload: SnapshotEventPayload<Task>
+): State => {
+  const prevTasks: Tasks = state.tasks ? { ...state.tasks } : {};
+  const tasks = payload.docs;
+  const newTasks = tasks.reduce((acc, task) => {
+    const projectTasks = acc[task.projectId] ? acc[task.projectId] : [];
+    const index = projectTasks.findIndex(t => t.id === task.id);
+    if (index === -1) {
+      acc[task.projectId] = [...projectTasks, task];
+      return acc;
+    }
+    projectTasks.splice(index, 1, task);
+    acc[task.projectId] = projectTasks;
+    return acc;
+  }, prevTasks);
+  return { ...state, tasks: newTasks };
+};
+
+const removeTasks = (
+  state: State,
+  payload: SnapshotEventPayload<Task>
+): State => {
+  const prevTasks: Tasks = state.tasks ? { ...state.tasks } : {};
+  const tasks = payload.docs;
+  const newTasks = tasks.reduce((acc, task) => {
+    const projectTasks = acc[task.projectId] ? acc[task.projectId] : [];
+    const index = projectTasks.findIndex(t => t.id === task.id);
+    if (index === -1) {
+      return acc;
+    }
+    projectTasks.splice(index, 1);
+    acc[task.projectId] = projectTasks;
+    return acc;
+  }, prevTasks);
+  return { ...state, tasks: newTasks };
+};
+
+const updateProjects = (projects: Project[], newProjects: Project[]) => {
+  return newProjects.reduce(
+    (acc, project) => {
+      const index = acc.findIndex(p => p.id === project.id);
+      return index === -1 ? [...acc, project] : acc.splice(index, 1, project);
+    },
+    [...projects]
+  );
+};
+
 const reducer = reducerWithInitialState(initialState)
   .case(todoActionCreators.clickEditTaskButton, (state, task) => {
     return { ...state, editTaskId: task.id };
@@ -42,58 +91,13 @@ const reducer = reducerWithInitialState(initialState)
   .case(todoActionCreators.clickCloseTaskButton, state => {
     return { ...state, editTaskId: null };
   })
-  .case(
-    taskCollectionActionCreator.added,
-    (state, payload: SnapshotEventPayload<Task>) => {
-      const newTasks = payload.docs.reduce((acc, task) => {
-        const currentTaskList = acc[task.projectId] ? acc[task.projectId] : [];
-        acc[task.projectId] = [...currentTaskList, task];
-        return acc;
-      }, {} as Tasks);
-      const currentTasks = state.tasks ? state.tasks : {};
-      return { ...state, tasks: { ...currentTasks, ...newTasks } };
-    }
-  )
-  .case(projectCollectionActionCreator.added, (state, projects) => {
+  .case(taskCollectionActionCreator.added, replaceTasks)
+  .case(projectCollectionActionCreator.added, (state, payload) => {
     const beforeProjects = state.projects ? state.projects : [];
-    return { ...state, projects: [...beforeProjects, ...projects.docs] };
+    return { ...state, projects: updateProjects(beforeProjects, payload.docs) };
   })
-  .case(taskCollectionActionCreator.modified, (state, payload) => {
-    if (!state.tasks) {
-      return { ...state };
-    }
-    const tasks = payload.docs.reduce(
-      (acc, task) => {
-        const projectTasks = acc[task.projectId] ? acc[task.projectId] : [];
-        const index = projectTasks.findIndex(t => t.id === task.id);
-        if (index === -1) {
-          return acc;
-        }
-        acc[task.projectId] = projectTasks.splice(index, 1, task);
-        return acc;
-      },
-      { ...state.tasks } as Tasks
-    );
-    return { ...state, tasks };
-  })
-  .case(taskCollectionActionCreator.removed, (state, payload) => {
-    if (!state.tasks) {
-      return { ...state };
-    }
-    const tasks = payload.docs.reduce(
-      (acc, task) => {
-        const projectTasks = acc[task.projectId] ? acc[task.projectId] : [];
-        const index = projectTasks.findIndex(t => t.id === task.id);
-        if (index === -1) {
-          return acc;
-        }
-        acc[task.projectId] = projectTasks.splice(index, 1);
-        return acc;
-      },
-      { ...state.tasks } as Tasks
-    );
-    return { ...state, tasks };
-  })
+  .case(taskCollectionActionCreator.modified, replaceTasks)
+  .case(taskCollectionActionCreator.removed, removeTasks)
   .case(sessionActionCreators.finishFirebaseInitializing, state => {
     return { ...state, isReadyFirebase: true };
   })
