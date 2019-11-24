@@ -1,11 +1,14 @@
 import firebase from 'firebase';
 import { eventChannel } from 'redux-saga';
 import { call, fork, put, take, takeEvery } from 'redux-saga/effects';
+import { Action } from 'typescript-fsa';
 import { bindAsyncAction } from 'typescript-fsa-redux-saga';
 import {
   sessionActionCreators,
-  sessionAsyncActionCreators
+  sessionAsyncActionCreators,
+  UpdateUserPayload
 } from '../actions/session';
+import { User } from '../reducer';
 import {
   fromFirebaseUserToUser,
   initializeFirebase
@@ -50,9 +53,29 @@ function* watchRequestToLogout() {
   yield takeEvery(sessionActionCreators.requestToLogout.type, logoutWorker);
 }
 
+function* updateUserWorker(user: User) {
+  const doc = firebase
+    .firestore()
+    .collection('users')
+    .doc(user.uid);
+  const docSnapshot = yield call(doc.get.bind(doc));
+  if (!docSnapshot.exists) {
+    yield call(doc.set.bind(doc), user);
+  }
+}
+
 export const sessionWatchers = [
   watchRequestToInitializeFirebase(),
-  watchRequestToLogout()
+  watchRequestToLogout(),
+  (function*() {
+    yield takeEvery(sessionActionCreators.updateUser.type, function*(
+      action: Action<UpdateUserPayload>
+    ) {
+      if (action.payload.user) {
+        yield updateUserWorker(action.payload.user);
+      }
+    });
+  })()
 ];
 
 function* initializeFirebaseWorkerWrapper() {

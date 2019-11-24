@@ -1,6 +1,12 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    match /users/{userID} {
+      allow read: if true;
+      allow write: if userID == request.auth.uid;
+    }
+
     match /projects/{projectID} {
     	function getProject(projectID) {
        	return get(/databases/$(database)/documents/projects/$(projectID)).data

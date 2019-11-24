@@ -12,7 +12,8 @@
     "tslint:prettier-check": "tslint-config-prettier-check ./tslint.json",
     "tslint": "tslint -c tslint.json 'src/**/*.ts' 'src/**/*.tsx' 'test/**/*.ts'",
     "export": "yarn build && next export",
-    "deploy-rules": "firebase deploy --only firestore:rules"
+    "deploy-rules": "firebase deploy --only firestore:rules",
+    "serve-firestore": "firebase emulators:start --only firestore"
   },
   "dependencies": {
     "@babel/plugin-proposal-nullish-coalescing-operator": "7.7.4",
