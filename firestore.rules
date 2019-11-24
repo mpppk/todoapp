@@ -1,0 +1,21 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /projects/{projectID} {
+    	function getProject(projectID) {
+       	return get(/databases/$(database)/documents/projects/$(projectID)).data
+      }
+      
+      function isPublicProject(projectID) {
+      	return getProject(projectID).isPublic
+      }
+      allow read, write: if isPublicProject(projectID) == true ||
+        resource.data.ownerId == request.auth.uid;
+
+  		match /tasks/{taskID} {
+        allow read: if getProject(projectID).ownerId == request.auth.uid;
+        allow write: if getProject(projectID).ownerId == request.auth.uid;
+      }
+    }   
+  }
+}
