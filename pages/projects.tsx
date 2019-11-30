@@ -17,6 +17,8 @@ const useHandlers = () => {
       dispatch(todoActionCreators.clickDeleteProjectButton(project)),
     clickEditProjectButton: (project: Project) =>
       dispatch(todoActionCreators.clickEditProjectButton(project)),
+    clickNewProjectButton: () =>
+      dispatch(todoActionCreators.clickNewProjectButton()),
     clickProject: (project: Project) =>
       dispatch(todoActionCreators.clickProject(project)),
     requestToInitializeFirebase: () => {
@@ -57,6 +59,7 @@ export default () => {
       <Projects
         onClickDeleteProjectButton={handlers.clickDeleteProjectButton}
         onClickEditProjectButton={handlers.clickEditProjectButton}
+        onClickNewProjectButton={handlers.clickNewProjectButton}
         onClickProject={handlers.clickProject}
         projects={state.projects}
       />
