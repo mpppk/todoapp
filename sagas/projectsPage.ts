@@ -5,15 +5,7 @@ import {
   projectCollectionActionCreator,
   todoActionCreators
 } from '../actions/todo';
-import { ProjectDraft, Task } from '../domain/todo';
-
-function* watchClickDeleteProjectButton() {
-  function* worker(action: Action<Task>) {
-    yield put(projectCollectionActionCreator.remove.started(action.payload));
-  }
-
-  yield takeEvery(todoActionCreators.clickDeleteProjectButton.type, worker);
-}
+import { Project, ProjectDraft } from '../domain/todo';
 
 function* watchClickCreateProjectButton() {
   function* worker(action: Action<ProjectDraft>) {
@@ -31,7 +23,29 @@ function* watchClickCreateProjectButton() {
   );
 }
 
+function* watchClickEditProjectButton() {
+  function* worker(action: Action<Project>) {
+    yield put(
+      projectCollectionActionCreator.modify.started({
+        doc: action.payload,
+        selectorParam: {}
+      })
+    );
+  }
+
+  yield takeEvery(todoActionCreators.clickEditProjectButton.type, worker);
+}
+
+function* watchClickDeleteProjectButton() {
+  function* worker(action: Action<Project>) {
+    yield put(projectCollectionActionCreator.remove.started(action.payload));
+  }
+
+  yield takeEvery(todoActionCreators.clickDeleteProjectButton.type, worker);
+}
+
 export const projectPageWatchers = [
-  watchClickDeleteProjectButton(),
-  watchClickCreateProjectButton()
+  watchClickCreateProjectButton(),
+  watchClickEditProjectButton(),
+  watchClickDeleteProjectButton()
 ];
