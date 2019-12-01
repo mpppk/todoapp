@@ -16,7 +16,6 @@ import { ProjectMenu } from './ProjectMenu';
 
 interface ProjectsProps {
   onClickProject: (project: ProjectEntity) => void;
-  onClickNewProjectButton: () => void;
   onClickDeleteProjectButton: (project: ProjectEntity) => void;
   onClickEditProjectButton: (project: ProjectEntity) => void;
   projects: ProjectEntity[];
@@ -86,13 +85,11 @@ export const Projects = (props: ProjectsProps) => {
         <Typography variant={'h3'}>Projects</Typography>
       </Grid>
       <Grid item={true} xs={4}>
-        <Button
-          variant={'outlined'}
-          color={'primary'}
-          onClick={props.onClickNewProjectButton}
-        >
-          New Project
-        </Button>
+        <Link href={'/projects/new'}>
+          <Button variant={'outlined'} color={'primary'}>
+            New Project
+          </Button>
+        </Link>
       </Grid>
       <Grid item={true} xs={12}>
         <List component="nav" aria-label="main mailbox folders">

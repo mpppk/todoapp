@@ -53,7 +53,7 @@ describe('/projects', () => {
   });
 
   it('can create new project', async () => {
-    await firebase.assertSucceeds(projectCollection.doc().set({ a: 1 }));
+    await firebase.assertSucceeds(projectCollection.add({ a: 1 }));
   });
 
   it('can not list all projects', async () => {

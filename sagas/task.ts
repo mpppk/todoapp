@@ -6,12 +6,12 @@ import { bindFireStoreCollection, takeEveryStartedAction } from './firestore';
 
 export const taskWorkers = bindFireStoreCollection(taskCollectionActionCreator);
 
-export function* observe() {
+export function* observeTasks() {
   yield take(sessionActionCreators.finishFirebaseInitializing);
   yield fork(taskWorkers.observe);
 }
 
 export const taskWatchers = [
   ...takeEveryStartedAction(taskCollectionActionCreator, taskWorkers),
-  observe()
+  observeTasks()
 ];

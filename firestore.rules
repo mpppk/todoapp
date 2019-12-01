@@ -9,6 +9,22 @@ service cloud.firestore {
       return signedIn() && userID == request.auth.uid;
     }
 
+    function isMember(rsc) {
+      return request.auth.uid in rsc.data.members.keys();
+    }
+
+    function getRole(rsc) {
+      return rsc.data.members[request.auth.uid];
+    }
+
+    function isOneOfRoles(rsc, array) {
+      return signedIn() && isMember(rsc) && (getRole(rsc) in array);
+    }
+
+    function getProject(projectID) {
+      return get(/databases/$(database)/documents/projects/$(projectID));
+    }
+
     match /users/{userID} {
       allow read: if true;
       allow write: if isSignedInUser(userID);
@@ -21,8 +37,8 @@ service cloud.firestore {
       allow create: if signedIn();
 
   		match /tasks/{taskID} {
-        allow read: if getProject(projectID).ownerId == request.auth.uid;
-        allow write: if getProject(projectID).ownerId == request.auth.uid;
+        allow read: if isOneOfRoles(getProject(projectID), ['projectOwner', 'projectWriter', 'projectReader']);
+        allow write: if isOneOfRoles(getProject(projectID), ['projectOwner', 'projectWriter']);
       }
     }   
   }

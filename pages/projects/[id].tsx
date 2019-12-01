@@ -48,7 +48,8 @@ const useGlobalState = () => {
         ? state.tasks[project.id]
         : [];
     return {
-      disableNewTaskButton: !state.tasks,
+      disableNewTaskButton: false, // FIXME: empty collection does not trigger added event
+      // disableNewTaskButton: state.tasks === null,
       editTaskId: state.editTaskId,
       isReadyFirebase: state.isReadyFirebase,
       project,

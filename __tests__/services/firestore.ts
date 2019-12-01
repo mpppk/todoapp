@@ -1,4 +1,4 @@
-import { parseCollectionPath } from '../../sagas/firestore';
+import { parseCollectionPath } from '../../services/firestore';
 
 describe('parseCollectionPath', () => {
   it('can parse', async () => {

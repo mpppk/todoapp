@@ -37,3 +37,17 @@ export const getFirebaseUIConfig = () => {
     signInSuccessUrl: '/'
   };
 };
+
+let db: firebase.firestore.Firestore | null = null;
+export const getFirestore = () => {
+  if (db === null) {
+    db = firebase.firestore();
+    // if (location.hostname === 'localhost') {
+    //   db.settings({
+    //     host: 'localhost:8081',
+    //     ssl: false,
+    //   })
+    // }
+  }
+  return db;
+};

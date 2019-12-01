@@ -49,8 +49,8 @@ export default () => {
   useEffect(() => {
     if (state.isReadyFirebase && state.user) {
       handlers.subscribeProjects();
+      return handlers.unsubscribeProjects;
     }
-    return handlers.unsubscribeProjects;
   }, [state.isReadyFirebase, state.user]);
 
   return (
@@ -59,7 +59,6 @@ export default () => {
       <Projects
         onClickDeleteProjectButton={handlers.clickDeleteProjectButton}
         onClickEditProjectButton={handlers.clickEditProjectButton}
-        onClickNewProjectButton={handlers.clickNewProjectButton}
         onClickProject={handlers.clickProject}
         projects={state.projects}
       />

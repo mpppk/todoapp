@@ -19,7 +19,9 @@ export interface TaskDraft {
 
 export type ProjectID = ID;
 export type Project = ProjectID & ProjectDraft;
+export type ProjectRoles = 'projectOwner' | 'projectWriter' | 'projectReader';
 export interface ProjectDraft {
   title: string;
   description: string;
+  members: { [key: string]: ProjectRoles };
 }

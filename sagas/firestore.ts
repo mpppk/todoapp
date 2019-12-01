@@ -2,6 +2,7 @@ import {
   all,
   call,
   cancel,
+  cancelled,
   fork,
   put,
   select,
@@ -19,6 +20,8 @@ import {
   SubscribeActionPayload
 } from '../actions/firestore';
 import { State } from '../reducer';
+import { parseCollectionPath } from '../services/firestore';
+import { getFirestore } from '../services/session';
 
 export interface DocBase {
   id: string;
@@ -71,8 +74,12 @@ function* watchQuerySnapShot<Doc extends DocBase>(
         yield put(actionCreators.modified({ payload, docs: modifiedDocs }));
       }
     }
+  } catch (e) {
+    throw e;
   } finally {
-    console.log('canceled'); // tslint:disable-line
+    if (yield cancelled()) {
+      console.log('canceled'); // tslint:disable-line
+    }
   } // tslint:disable-line
 }
 
@@ -104,7 +111,7 @@ const bindToAddDoc = <DocWOBase, Result, Error>(
   return bindAsyncAction(asyncActionCreators, {
     skipStartedAction: true
   })(function*(param) {
-    const db = firebase.firestore();
+    const db = getFirestore();
     const collection = collectionSelector(db, param.selectorParam);
     return yield call(collection.add.bind(collection), param.doc);
   });
@@ -117,7 +124,7 @@ const bindToModifyDoc = <Doc, Result, Error>(
   return bindAsyncAction(asyncActionCreators, {
     skipStartedAction: true
   })(function*(param) {
-    const db = firebase.firestore();
+    const db = getFirestore();
     const doc = docSelector(db, param.selectorParam);
     return yield call(doc.set.bind(doc), param.doc);
   });
@@ -134,30 +141,10 @@ const bindToRemoveDoc = <Result, Error>(
   return bindAsyncAction(asyncActionCreators, {
     skipStartedAction: true
   })(function*(selectorParam: SubscribeActionPayload) {
-    const db = firebase.firestore();
+    const db = getFirestore();
     const doc = docSelector(db, selectorParam);
     return yield call(doc.delete.bind(doc));
   });
-};
-
-export const parseCollectionPath = <Doc extends { [key: string]: any }>(
-  collectionPath: string,
-  param: Doc
-): string => {
-  return collectionPath
-    .split('/')
-    .map(collection => {
-      const v = /{(.+?)}/.exec(collection);
-      if (!v || v.length < 2 || !param.hasOwnProperty(v[1])) {
-        return collection;
-      }
-      const key = v[1];
-      if (!['number', 'string'].includes(typeof param[key])) {
-        return collection;
-      }
-      return v && param.hasOwnProperty(key) ? param[key] : collection;
-    })
-    .join('/');
 };
 
 type Task = any; // FIXME
@@ -205,7 +192,7 @@ export const bindFireStoreCollection = <Doc extends DocBase>(
         return;
       }
 
-      const collection = collectionSelector(firebase.firestore(), payload); // FIXME
+      const collection = collectionSelector(getFirestore(), payload); // FIXME
 
       const state = yield select();
       const w = watchQuerySnapShot.bind(

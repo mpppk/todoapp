@@ -11,6 +11,7 @@ import {
 import { User } from '../reducer';
 import {
   fromFirebaseUserToUser,
+  getFirestore,
   initializeFirebase
 } from '../services/session';
 
@@ -54,8 +55,7 @@ function* watchRequestToLogout() {
 }
 
 function* updateUserWorker(user: User) {
-  const doc = firebase
-    .firestore()
+  const doc = getFirestore()
     .collection('users')
     .doc(user.uid);
   const docSnapshot = yield call(doc.get.bind(doc));
