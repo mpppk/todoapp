@@ -2,7 +2,7 @@
   "name": "firebase-todoapp",
   "version": "0.0.1",
   "scripts": {
-    "test": "jest --detectOpenHandles",
+    "test": "jest --forceExit",
     "dev": "next",
     "build": "next build",
     "start": "next start",
