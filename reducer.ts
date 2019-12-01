@@ -1,3 +1,4 @@
+import { combineReducers } from 'redux';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import { SnapshotEventPayload } from './actions/firestore';
 import { sessionActionCreators } from './actions/session';
@@ -12,12 +13,19 @@ interface Tasks {
   [key: string]: Task[];
 }
 
-export const initialState = {
+const globalState = {
   editTaskId: null as string | null,
   isReadyFirebase: false,
   projects: null as Project[] | null,
   tasks: null as Tasks | null,
   user: null as User | null
+};
+
+export const initialState = {
+  global: globalState,
+  projectsNew: {
+    newProjectKey: null as string | null
+  }
 };
 
 export interface User {
@@ -31,11 +39,13 @@ export interface User {
 }
 
 export type State = typeof initialState;
+export type GlobalState = typeof initialState.global;
+export type ProjectsNewPageState = typeof initialState.projectsNew;
 
 const replaceTasks = (
-  state: State,
+  state: GlobalState,
   payload: SnapshotEventPayload<Task>
-): State => {
+): GlobalState => {
   const prevTasks: Tasks = state.tasks ? { ...state.tasks } : {};
   const tasks = payload.docs;
   const newTasks = tasks.reduce((acc, task) => {
@@ -53,9 +63,9 @@ const replaceTasks = (
 };
 
 const removeTasks = (
-  state: State,
+  state: GlobalState,
   payload: SnapshotEventPayload<Task>
-): State => {
+): GlobalState => {
   const prevTasks: Tasks = state.tasks ? { ...state.tasks } : {};
   const tasks = payload.docs;
   const newTasks = tasks.reduce((acc, task) => {
@@ -81,7 +91,7 @@ const updateProjects = (projects: Project[], newProjects: Project[]) => {
   );
 };
 
-const reducer = reducerWithInitialState(initialState)
+const globalReducer = reducerWithInitialState(initialState.global)
   .case(todoActionCreators.clickEditTaskButton, (state, task) => {
     return { ...state, editTaskId: task.id };
   })
@@ -105,4 +115,8 @@ const reducer = reducerWithInitialState(initialState)
     return { ...state, user: payload.user };
   });
 
-export default reducer;
+const projectsNewReducer = reducerWithInitialState(initialState.projectsNew);
+export default combineReducers({
+  global: globalReducer,
+  projectsNew: projectsNewReducer
+});

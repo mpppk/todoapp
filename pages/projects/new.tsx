@@ -3,6 +3,7 @@ import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import TextField from '@material-ui/core/TextField';
+import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { projectsNewPageActionCreators } from '../../actions/pages/projectsNew';
@@ -26,7 +27,7 @@ const useHandlers = () => {
 };
 
 const useReduxState = () => {
-  const user = useSelector((state: State) => state.user);
+  const user = useSelector((state: State) => state.global.user);
   return { user };
 };
 
@@ -47,6 +48,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 export default () => {
+  const router = useRouter();
   const classes = useStyles();
   const handlers = useHandlers();
   const state = useReduxState();
@@ -72,6 +74,7 @@ export default () => {
       },
       title
     });
+    router.push('/projects');
     setTitle('');
     setDescription('');
   };

@@ -34,10 +34,11 @@ const useHandlers = () => {
 };
 
 const selector = (state: State) => {
+  const global = state.global;
   return {
-    isReadyFirebase: state.isReadyFirebase,
-    projects: state.projects ? state.projects : [],
-    user: state.user
+    isReadyFirebase: global.isReadyFirebase,
+    projects: global.projects ? global.projects : [],
+    user: global.user
   };
 };
 

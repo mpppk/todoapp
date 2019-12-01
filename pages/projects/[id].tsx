@@ -11,7 +11,7 @@ import {
 import MyAppBar from '../../components/AppBar';
 import Page from '../../components/Page';
 import { Task, TaskDraft } from '../../domain/todo';
-import { State } from '../../reducer';
+import { GlobalState, State } from '../../reducer';
 
 const useHandlers = () => {
   const dispatch = useDispatch();
@@ -40,7 +40,7 @@ const useHandlers = () => {
 const useGlobalState = () => {
   const router = useRouter();
   const id = router.query.id;
-  return useSelector((state: State) => {
+  const globalSelector = (state: GlobalState) => {
     const projects = state.projects ? state.projects : [];
     const project = projects.find(p => p.id === id);
     const tasks =
@@ -57,6 +57,9 @@ const useGlobalState = () => {
       // tasks: tasks.filter(t => t.projectId),
       user: state.user
     };
+  };
+  return useSelector((state: State) => {
+    return { ...globalSelector(state.global) };
   });
 };
 
