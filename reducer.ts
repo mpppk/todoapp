@@ -108,6 +108,14 @@ const globalReducer = reducerWithInitialState(initialState.global)
   })
   .case(taskCollectionActionCreator.modified, replaceTasks)
   .case(taskCollectionActionCreator.removed, removeTasks)
+  .case(projectCollectionActionCreator.removed, (state, payload) => {
+    if (state.projects === null) {
+      return { ...state };
+    }
+    const ids = payload.docs.map(doc => doc.id);
+    const projects = state.projects.filter(p => !ids.includes(p.id));
+    return { ...state, projects };
+  })
   .case(sessionActionCreators.finishFirebaseInitializing, state => {
     return { ...state, isReadyFirebase: true };
   })
