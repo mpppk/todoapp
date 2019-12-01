@@ -16,7 +16,7 @@ const useHandlers = () => {
 };
 
 const useReduxState = () => {
-  const user = useSelector((state: State) => state.user);
+  const user = useSelector((state: State) => state.global.user);
   return { user };
 };
 
