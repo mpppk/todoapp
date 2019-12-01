@@ -2,6 +2,7 @@ import {
   all,
   call,
   cancel,
+  cancelled,
   fork,
   put,
   select,
@@ -12,13 +13,15 @@ import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import _ from 'lodash';
 import { eventChannel } from 'redux-saga';
-import { Action, AsyncActionCreators } from 'typescript-fsa';
+import { Action } from 'typescript-fsa';
 import { bindAsyncAction } from 'typescript-fsa-redux-saga';
 import {
   CollectionActionCreator,
   SubscribeActionPayload
 } from '../actions/firestore';
 import { State } from '../reducer';
+import { parseCollectionPath } from '../services/firestore';
+import { getFirestore } from '../services/session';
 
 export interface DocBase {
   id: string;
@@ -71,20 +74,14 @@ function* watchQuerySnapShot<Doc extends DocBase>(
         yield put(actionCreators.modified({ payload, docs: modifiedDocs }));
       }
     }
+  } catch (e) {
+    throw e;
   } finally {
-    console.log('canceled'); // tslint:disable-line
+    if (yield cancelled()) {
+      console.log('canceled'); // tslint:disable-line
+    }
   } // tslint:disable-line
 }
-
-type DocSelector = (
-  db: firebase.firestore.Firestore,
-  param: SubscribeActionPayload
-) => firebase.firestore.DocumentReference;
-
-export type CollectionSelector = (
-  db: firebase.firestore.Firestore,
-  param: SubscribeActionPayload
-) => firebase.firestore.CollectionReference;
 
 export type QueryBuilder<Context> = (
   context: Context,
@@ -92,73 +89,14 @@ export type QueryBuilder<Context> = (
   collection: firebase.firestore.CollectionReference
 ) => firebase.firestore.Query;
 
+export interface QueryBuilders<Context> {
+  subscribe: QueryBuilder<Context>;
+}
+
 export interface DocParam<DocWithOutID> {
   doc: DocWithOutID;
   selectorParam: SubscribeActionPayload;
 }
-
-const bindToAddDoc = <DocWOBase, Result, Error>(
-  collectionSelector: CollectionSelector,
-  asyncActionCreators: AsyncActionCreators<DocParam<DocWOBase>, Result, Error>
-) => {
-  return bindAsyncAction(asyncActionCreators, {
-    skipStartedAction: true
-  })(function*(param) {
-    const db = firebase.firestore();
-    const collection = collectionSelector(db, param.selectorParam);
-    return yield call(collection.add.bind(collection), param.doc);
-  });
-};
-
-const bindToModifyDoc = <Doc, Result, Error>(
-  docSelector: DocSelector,
-  asyncActionCreators: AsyncActionCreators<DocParam<Doc>, Result, Error>
-) => {
-  return bindAsyncAction(asyncActionCreators, {
-    skipStartedAction: true
-  })(function*(param) {
-    const db = firebase.firestore();
-    const doc = docSelector(db, param.selectorParam);
-    return yield call(doc.set.bind(doc), param.doc);
-  });
-};
-
-const bindToRemoveDoc = <Result, Error>(
-  docSelector: DocSelector,
-  asyncActionCreators: AsyncActionCreators<
-    SubscribeActionPayload,
-    Result,
-    Error
-  >
-) => {
-  return bindAsyncAction(asyncActionCreators, {
-    skipStartedAction: true
-  })(function*(selectorParam: SubscribeActionPayload) {
-    const db = firebase.firestore();
-    const doc = docSelector(db, selectorParam);
-    return yield call(doc.delete.bind(doc));
-  });
-};
-
-export const parseCollectionPath = <Doc extends { [key: string]: any }>(
-  collectionPath: string,
-  param: Doc
-): string => {
-  return collectionPath
-    .split('/')
-    .map(collection => {
-      const v = /{(.+?)}/.exec(collection);
-      if (!v || v.length < 2 || !param.hasOwnProperty(v[1])) {
-        return collection;
-      }
-      const key = v[1];
-      if (!['number', 'string'].includes(typeof param[key])) {
-        return collection;
-      }
-      return v && param.hasOwnProperty(key) ? param[key] : collection;
-    })
-    .join('/');
-};
 
 type Task = any; // FIXME
 
@@ -169,34 +107,26 @@ const generateCollectionSelector = (collectionPath: string) => {
   };
 };
 
-const generateDocSelector = (collectionPath: string) => {
-  return (db: firebase.firestore.Firestore, params: SubscribeActionPayload) => {
-    const parsedPath = parseCollectionPath(collectionPath, params);
-    if (!params.hasOwnProperty('id')) {
-      throw Error('doc param does not have id. ' + params);
-    }
-    // FIXME any
-    return db.collection(parsedPath).doc((params as any).id);
+const generateBypassQueryBuilders = <Context>() => {
+  return {
+    subscribe: (
+      _context: Context,
+      _state: State,
+      collection: firebase.firestore.CollectionReference
+    ) => collection
   };
-};
-
-const generateBypassQueryBuilder = <Context>() => {
-  return (
-    _context: Context,
-    _state: State,
-    collection: firebase.firestore.CollectionReference
-  ) => collection;
 };
 
 export const bindFireStoreCollection = <Doc extends DocBase>(
   actionCreators: CollectionActionCreator<Doc>,
-  queryBuilder: QueryBuilder<
+  queryBuilders: QueryBuilders<
     SubscribeActionPayload
-  > = generateBypassQueryBuilder(),
-  collectionSelector: CollectionSelector = generateCollectionSelector(
-    actionCreators.collectionPath
-  )
+  > = generateBypassQueryBuilders()
 ) => {
+  const collectionSelector = generateCollectionSelector(
+    actionCreators.collectionPath
+  );
+
   function* observe() {
     const subscriptions: Array<[Task, SubscribeActionPayload]> = [];
 
@@ -205,13 +135,13 @@ export const bindFireStoreCollection = <Doc extends DocBase>(
         return;
       }
 
-      const collection = collectionSelector(firebase.firestore(), payload); // FIXME
+      const collection = collectionSelector(getFirestore(), payload); // FIXME
 
       const state = yield select();
       const w = watchQuerySnapShot.bind(
         watchQuerySnapShot,
         actionCreators as CollectionActionCreator<any>, // FIXME
-        queryBuilder(payload, state, collection),
+        queryBuilders.subscribe(payload, state, collection),
         payload
       );
       const task = yield fork(w);
@@ -253,12 +183,34 @@ export const bindFireStoreCollection = <Doc extends DocBase>(
     ]);
   }
 
-  const docSelector = generateDocSelector(actionCreators.collectionPath);
+  const opt = { skipStartedAction: true };
   return {
-    add: bindToAddDoc(collectionSelector, actionCreators.add),
-    modify: bindToModifyDoc(docSelector, actionCreators.modify),
+    add: bindAsyncAction(
+      actionCreators.add,
+      opt
+    )(function*(param) {
+      const context = { ...param.doc, ...param.selectorParam };
+      const collection = collectionSelector(getFirestore(), context); // FIXME
+      return yield call(collection.add.bind(collection), param.doc);
+    }),
+    modify: bindAsyncAction(
+      actionCreators.modify,
+      opt
+    )(function*(param) {
+      const context = { ...param.doc, ...param.selectorParam };
+      const collection = collectionSelector(getFirestore(), context); // FIXME
+      const doc = collection.doc(context.id);
+      return yield call(doc.set.bind(doc), param.doc);
+    }),
     observe,
-    remove: bindToRemoveDoc(docSelector, actionCreators.remove)
+    remove: bindAsyncAction(
+      actionCreators.remove,
+      opt
+    )(function*(selectorParam) {
+      const collection = collectionSelector(getFirestore(), selectorParam); // FIXME
+      const doc = collection.doc(selectorParam.id);
+      return yield call(doc.delete.bind(doc));
+    })
   };
 };
 

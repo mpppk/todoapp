@@ -17,6 +17,8 @@ const useHandlers = () => {
       dispatch(todoActionCreators.clickDeleteProjectButton(project)),
     clickEditProjectButton: (project: Project) =>
       dispatch(todoActionCreators.clickEditProjectButton(project)),
+    clickNewProjectButton: () =>
+      dispatch(todoActionCreators.clickNewProjectButton()),
     clickProject: (project: Project) =>
       dispatch(todoActionCreators.clickProject(project)),
     requestToInitializeFirebase: () => {
@@ -32,10 +34,11 @@ const useHandlers = () => {
 };
 
 const selector = (state: State) => {
+  const global = state.global;
   return {
-    isReadyFirebase: state.isReadyFirebase,
-    projects: state.projects ? state.projects : [],
-    user: state.user
+    isReadyFirebase: global.isReadyFirebase,
+    projects: global.projects ? global.projects : [],
+    user: global.user
   };
 };
 
@@ -47,8 +50,8 @@ export default () => {
   useEffect(() => {
     if (state.isReadyFirebase && state.user) {
       handlers.subscribeProjects();
+      return handlers.unsubscribeProjects;
     }
-    return handlers.unsubscribeProjects;
   }, [state.isReadyFirebase, state.user]);
 
   return (
