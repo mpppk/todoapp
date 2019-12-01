@@ -25,7 +25,7 @@ export interface CollectionActionCreator<Doc extends DocBase> {
     firebase.firestore.DocumentReference
   >;
   remove: AsyncActionCreators<
-    SubscribeActionPayload,
+    SubscribeActionPayload & DocBase,
     firebase.firestore.DocumentReference
   >;
   added: ActionCreator<SnapshotEventPayload<Doc>>;
@@ -54,7 +54,7 @@ export const firebaseActionCreatorFactory = (prefix: string) => {
     >(`${eventPrefix}_MODIFY`);
 
     const remove = factory.async<
-      SubscribeActionPayload,
+      SubscribeActionPayload & DocBase,
       firebase.firestore.DocumentReference
     >(`${eventPrefix}_REMOVE`);
 
