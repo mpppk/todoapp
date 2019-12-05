@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { sessionActionCreators } from '../actions/session';
@@ -12,11 +13,15 @@ import { State } from '../reducer';
 
 const useHandlers = () => {
   const dispatch = useDispatch();
+  const router = useRouter();
   return {
     clickDeleteProjectButton: (project: Project) =>
       dispatch(todoActionCreators.clickDeleteProjectButton(project)),
     clickEditProjectButton: (project: Project) =>
-      dispatch(todoActionCreators.clickEditProjectButton(project)),
+      router.push(
+        `/projects/[id]/settings`,
+        `/projects/${project.id}/settings`
+      ),
     clickNewProjectButton: () =>
       dispatch(todoActionCreators.clickNewProjectButton()),
     clickProject: (project: Project) =>
