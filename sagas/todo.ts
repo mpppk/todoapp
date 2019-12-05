@@ -1,10 +1,11 @@
 import { put, takeEvery } from '@redux-saga/core/effects';
 import { Action } from 'typescript-fsa';
 import {
+  projectCollectionActionCreator,
   taskCollectionActionCreator,
   todoActionCreators
 } from '../actions/todo';
-import { Task, TaskDraft } from '../domain/todo';
+import { Project, Task, TaskDraft } from '../domain/todo';
 import { DocParam } from './firestore';
 
 function* watchClickNewTaskButton() {
@@ -40,8 +41,25 @@ function* watchClickDeleteTaskButton() {
   yield takeEvery(todoActionCreators.clickDeleteTaskButton.type, worker);
 }
 
+function* watchClickSaveProjectSettingsButton() {
+  function* worker(action: Action<Project>) {
+    const project = action.payload;
+    const param = {
+      doc: project,
+      selectorParam: project
+    };
+    yield put(projectCollectionActionCreator.modify.started(param));
+  }
+
+  yield takeEvery(
+    todoActionCreators.clickSaveProjectSettingsButton.type,
+    worker
+  );
+}
+
 export const todoWatchers = [
   watchClickNewTaskButton(),
   watchClickUpdateTaskButton(),
-  watchClickDeleteTaskButton()
+  watchClickDeleteTaskButton(),
+  watchClickSaveProjectSettingsButton()
 ];

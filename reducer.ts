@@ -42,6 +42,29 @@ export type State = typeof initialState;
 export type GlobalState = typeof initialState.global;
 export type ProjectsNewPageState = typeof initialState.projectsNew;
 
+const replaceProject = (
+  projects: Project[],
+  newProject: Project
+): Project[] => {
+  const index = projects.findIndex(p => p.id === newProject.id);
+  if (index !== -1) {
+    projects[index] = newProject;
+  }
+  return projects;
+};
+
+const replaceProjects = (
+  orgState: GlobalState,
+  payload: SnapshotEventPayload<Project>
+): GlobalState => {
+  const state = { ...orgState };
+  if (!state.projects) {
+    return state;
+  }
+  state.projects = payload.docs.reduce(replaceProject, state.projects);
+  return state;
+};
+
 const replaceTasks = (
   state: GlobalState,
   payload: SnapshotEventPayload<Task>
@@ -108,6 +131,7 @@ const globalReducer = reducerWithInitialState(initialState.global)
   })
   .case(taskCollectionActionCreator.modified, replaceTasks)
   .case(taskCollectionActionCreator.removed, removeTasks)
+  .case(projectCollectionActionCreator.modified, replaceProjects)
   .case(projectCollectionActionCreator.removed, (state, payload) => {
     if (state.projects === null) {
       return { ...state };

@@ -23,6 +23,9 @@ export const todoActionCreators = {
     'CLICK_NEW_TASK_BUTTON'
   ),
   clickProject: todoActionCreatorFactory<Project>('CLICK_PROJECT'),
+  clickSaveProjectSettingsButton: todoActionCreatorFactory<Project>(
+    'CLICK_SAVE_PROJECT_SETTINGS_BUTTON'
+  ),
   clickUpdateTaskButton: todoActionCreatorFactory<Task>(
     'CLICK_UPDATE_TASK_BUTTON'
   )
