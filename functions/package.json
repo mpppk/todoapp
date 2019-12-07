@@ -1,7 +1,6 @@
 {
   "name": "functions",
   "scripts": {
-    "lint": "tslint --project tsconfig.json",
     "build": "tsc",
     "watch": "tsc -w",
     "serve": "firebase serve --only functions",
