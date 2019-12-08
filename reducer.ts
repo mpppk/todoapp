@@ -7,7 +7,10 @@ import {
   taskCollectionActionCreator,
   todoActionCreators
 } from './actions/todo';
-import { userCollectionActionCreator } from './actions/user';
+import {
+  userCollectionActionCreator,
+  userCollectionQueryActionCreators
+} from './actions/user';
 import { Project, Task } from './domain/todo';
 import { DocBase } from './sagas/firestore';
 
@@ -29,6 +32,7 @@ export const initialState = {
     newProjectKey: null as string | null
   },
   projectsSettings: {
+    candidateUsers: [] as User[],
     users: [] as User[]
   }
 };
@@ -179,7 +183,16 @@ const replaceUsers = (
 
 const projectsSettingsReducer = reducerWithInitialState(
   initialState.projectsSettings
-).case(userCollectionActionCreator.added, replaceUsers);
+)
+  .case(userCollectionActionCreator.added, replaceUsers)
+  .case(
+    userCollectionQueryActionCreators.searchProjectMemberCandidate.done,
+    (state, payload) => {
+      const candidateUsers = payload.result.docs.map((doc: any) => doc.data());
+      return { ...state, candidateUsers };
+    }
+  );
+
 export default combineReducers({
   global: globalReducer,
   projectsNew: projectsNewReducer,

@@ -12,6 +12,7 @@ import {
   todoActionCreators
 } from '../../../actions/todo';
 import { userCollectionActionCreator } from '../../../actions/user';
+import AddNewMemberToProjectDialog from '../../../components/AddNewMemberToProjectDialog';
 import MyAppBar from '../../../components/AppBar';
 import ProjectMemberList from '../../../components/ProjectMemberList';
 import { ChangeEvent, EventHandler } from '../../../core/events';
@@ -21,6 +22,9 @@ import { State } from '../../../reducer';
 const useHandlers = () => {
   const dispatch = useDispatch();
   return {
+    changeUserNameInput: (username: string) => {
+      dispatch(todoActionCreators.changeNewMemberSearchUserNameInput(username));
+    },
     clickSaveProjectSettingsButton: (project: Project) => {
       dispatch(todoActionCreators.clickSaveProjectSettingsButton(project));
     },
@@ -42,6 +46,7 @@ const useReduxState = () => {
     const projects = state.global.projects ? state.global.projects : [];
     const project = projects.find(p => p.id === id);
     return {
+      candidateUsers: state.projectsSettings.candidateUsers,
       isReadyFirebase: state.global.isReadyFirebase,
       project,
       projectUsers: state.projectsSettings.users,
@@ -71,6 +76,15 @@ export default () => {
   const handlers = useHandlers();
   const state = useReduxState();
   const router = useRouter();
+  const [open, setOpen] = React.useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const handleClickSaveProjectSettingsButton = () => {
     if (state.user === null) {
@@ -148,6 +162,13 @@ export default () => {
         <Grid item={true}>
           <Typography variant={'h4'}>Members</Typography>
           <ProjectMemberList users={state.projectUsers} />
+          <Button
+            variant={'outlined'}
+            color={'secondary'}
+            onClick={handleClickOpen}
+          >
+            Add new member
+          </Button>
         </Grid>
         <Grid item={true}>
           <Button
@@ -160,6 +181,12 @@ export default () => {
           </Button>
         </Grid>
       </Grid>
+      <AddNewMemberToProjectDialog
+        open={open}
+        onChangeUserNameInput={handlers.changeUserNameInput}
+        onClose={handleClose}
+        users={state.candidateUsers} // FIXME
+      />
     </div>
   );
 };

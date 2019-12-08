@@ -1,6 +1,7 @@
 import { all } from '@redux-saga/core/effects';
 import { projectWatchers } from './projects';
 import { projectPageWatchers } from './projectsPage';
+import { projectsSettingsPageWatchers } from './projectsSettingsPage';
 import { sessionWatchers } from './session';
 import { taskWatchers } from './task';
 import { todoWatchers } from './todo';
@@ -13,6 +14,7 @@ export default function* rootSaga() {
     ...taskWatchers,
     ...projectWatchers,
     ...userWatchers,
-    ...projectPageWatchers
+    ...projectPageWatchers,
+    ...projectsSettingsPageWatchers
   ]);
 }

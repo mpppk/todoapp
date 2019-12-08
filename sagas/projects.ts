@@ -19,9 +19,14 @@ const projectsQueryBuilder = (
   ]);
 };
 
-const projectWorkers = bindFireStoreCollection(projectCollectionActionCreator, {
-  subscribe: projectsQueryBuilder
-});
+const projectWorkers = bindFireStoreCollection(
+  projectCollectionActionCreator,
+  {},
+  {
+    queries: {},
+    subscribe: projectsQueryBuilder
+  }
+);
 
 function* observeProjects() {
   yield take(sessionActionCreators.finishFirebaseInitializing);
