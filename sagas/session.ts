@@ -57,7 +57,7 @@ function* watchRequestToLogout() {
 function* updateUserWorker(user: User) {
   const doc = getFirestore()
     .collection('users')
-    .doc(user.uid);
+    .doc(user.id);
   const docSnapshot = yield call(doc.get.bind(doc));
   if (!docSnapshot.exists) {
     yield call(doc.set.bind(doc), user);

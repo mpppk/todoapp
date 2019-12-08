@@ -11,7 +11,9 @@ import {
   projectCollectionActionCreator,
   todoActionCreators
 } from '../../../actions/todo';
+import { userCollectionActionCreator } from '../../../actions/user';
 import MyAppBar from '../../../components/AppBar';
+import ProjectMemberList from '../../../components/ProjectMemberList';
 import { ChangeEvent, EventHandler } from '../../../core/events';
 import { Project } from '../../../domain/todo';
 import { State } from '../../../reducer';
@@ -27,7 +29,9 @@ const useHandlers = () => {
     },
     requestToLogout: () => dispatch(sessionActionCreators.requestToLogout()),
     subscribeProject: () =>
-      dispatch(projectCollectionActionCreator.subscribe.started({}))
+      dispatch(projectCollectionActionCreator.subscribe.started({})),
+    subscribeProjectUser: (projectId: string) =>
+      dispatch(userCollectionActionCreator.subscribe.started({ projectId }))
   };
 };
 
@@ -40,6 +44,7 @@ const useReduxState = () => {
     return {
       isReadyFirebase: state.global.isReadyFirebase,
       project,
+      projectUsers: state.projectsSettings.users,
       user: state.global.user
     };
   });
@@ -101,6 +106,7 @@ export default () => {
     if (state.isReadyFirebase && state.project) {
       setTitle(state.project.title);
       setDescription(state.project.description);
+      handlers.subscribeProjectUser(state.project.id);
     }
   }, [state.isReadyFirebase, state.project]);
 
@@ -138,6 +144,10 @@ export default () => {
             value={description}
             onChange={handleChangeDescriptionInput}
           />
+        </Grid>
+        <Grid item={true}>
+          <Typography variant={'h4'}>Members</Typography>
+          <ProjectMemberList users={state.projectUsers} />
         </Grid>
         <Grid item={true}>
           <Button

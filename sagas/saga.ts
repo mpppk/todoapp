@@ -4,6 +4,7 @@ import { projectPageWatchers } from './projectsPage';
 import { sessionWatchers } from './session';
 import { taskWatchers } from './task';
 import { todoWatchers } from './todo';
+import { userWatchers } from './user';
 
 export default function* rootSaga() {
   yield all([
@@ -11,6 +12,7 @@ export default function* rootSaga() {
     ...todoWatchers,
     ...taskWatchers,
     ...projectWatchers,
+    ...userWatchers,
     ...projectPageWatchers
   ]);
 }

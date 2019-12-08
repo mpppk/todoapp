@@ -7,7 +7,9 @@ import {
   taskCollectionActionCreator,
   todoActionCreators
 } from './actions/todo';
+import { userCollectionActionCreator } from './actions/user';
 import { Project, Task } from './domain/todo';
+import { DocBase } from './sagas/firestore';
 
 interface Tasks {
   [key: string]: Task[];
@@ -25,6 +27,9 @@ export const initialState = {
   global: globalState,
   projectsNew: {
     newProjectKey: null as string | null
+  },
+  projectsSettings: {
+    users: [] as User[]
   }
 };
 
@@ -35,12 +40,13 @@ export interface User {
   photoURL?: string;
   isAnonymous: boolean;
   phoneNumber: string | null;
-  uid: string;
+  id: string;
 }
 
 export type State = typeof initialState;
 export type GlobalState = typeof initialState.global;
 export type ProjectsNewPageState = typeof initialState.projectsNew;
+export type ProjectsSettingsPageState = typeof initialState.projectsSettings;
 
 const replaceProject = (
   projects: Project[],
@@ -148,7 +154,34 @@ const globalReducer = reducerWithInitialState(initialState.global)
   });
 
 const projectsNewReducer = reducerWithInitialState(initialState.projectsNew);
+
+const compareById = (a: DocBase, b: DocBase) => {
+  if (a.id > b.id) {
+    return 1;
+  } else if (a.id < b.id) {
+    return -1;
+  }
+  return 0;
+};
+
+const replaceUsers = (
+  state: ProjectsSettingsPageState,
+  payload: SnapshotEventPayload<User>
+): ProjectsSettingsPageState => {
+  const prevUsers = state.users;
+  const newUsers = payload.docs;
+  const filteredUsers = prevUsers.filter(
+    pu => !newUsers.map(u => u.id).includes(pu.id)
+  );
+  const users = [...filteredUsers, ...newUsers].sort(compareById);
+  return { ...state, users };
+};
+
+const projectsSettingsReducer = reducerWithInitialState(
+  initialState.projectsSettings
+).case(userCollectionActionCreator.added, replaceUsers);
 export default combineReducers({
   global: globalReducer,
-  projectsNew: projectsNewReducer
+  projectsNew: projectsNewReducer,
+  projectsSettings: projectsSettingsReducer
 });
