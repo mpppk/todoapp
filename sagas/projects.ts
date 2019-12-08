@@ -11,7 +11,7 @@ const projectsQueryBuilder = (
   state: State,
   collection: firebase.firestore.CollectionReference
 ) => {
-  const uid = state.global.user ? state.global.user.uid : null;
+  const uid = state.global.user ? state.global.user.id : null;
   return collection.where(`members.${uid}`, 'in', [
     'projectOwner',
     'projectWriter',

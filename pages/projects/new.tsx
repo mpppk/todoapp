@@ -70,7 +70,7 @@ export default () => {
     handlers.clickCreateProjectButton({
       description,
       members: {
-        [state.user.uid]: 'projectOwner'
+        [state.user.id]: 'projectOwner'
       },
       title
     });

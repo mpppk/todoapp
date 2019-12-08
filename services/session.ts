@@ -11,7 +11,7 @@ export const fromFirebaseUserToUser = (user: firebase.User): User => {
     isAnonymous: user.isAnonymous,
     phoneNumber: user.phoneNumber,
     photoURL: user.photoURL ? user.photoURL : undefined,
-    uid: user.uid
+    id: user.uid
   };
 };
 

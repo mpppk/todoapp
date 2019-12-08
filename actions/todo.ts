@@ -31,7 +31,7 @@ export const todoActionCreators = {
   )
 };
 
-const fbFactory = firebaseActionCreatorFactory('FIREBASE');
+export const fbFactory = firebaseActionCreatorFactory('FIREBASE');
 export const projectCollectionActionCreator = fbFactory.firestore.collection<
   Project
 >('projects');
