@@ -21,7 +21,7 @@ export interface CollectionActionCreator<Doc extends DocBase> {
   >;
   collectionPath: string;
   modify: AsyncActionCreators<
-    DocParam<Doc>,
+    DocParam<Partial<Doc>>,
     firebase.firestore.DocumentReference
   >;
   remove: AsyncActionCreators<
@@ -35,12 +35,21 @@ export interface CollectionActionCreator<Doc extends DocBase> {
   unsubscribe: AsyncActionCreators<SubscribeActionPayload, undefined>;
 }
 
+export interface CollectionQueryActionCreators<Result = any> {
+  [key: string]: AsyncActionCreators<any, Result>; // FIXME
+}
+
+export interface FirebaseCollectionActionCreatorFactory<Doc extends DocBase> {
+  build: () => CollectionActionCreator<Doc>;
+  create: <T>(type: string) => AsyncActionCreators<T, any>;
+}
+
 export const firebaseActionCreatorFactory = (prefix: string) => {
   const factory = actionCreatorFactory(prefix);
 
   const collectionActionCreator = <Doc extends DocBase>(
     collectionPath: string
-  ): CollectionActionCreator<Doc> => {
+  ): FirebaseCollectionActionCreatorFactory<Doc> => {
     const eventPrefix = collectionPath.toUpperCase();
 
     const add = factory.async<
@@ -49,7 +58,7 @@ export const firebaseActionCreatorFactory = (prefix: string) => {
     >(`${eventPrefix}_ADD`);
 
     const modify = factory.async<
-      DocParam<Doc>,
+      DocParam<Partial<Doc>>,
       firebase.firestore.DocumentReference
     >(`${eventPrefix}_MODIFY`);
 
@@ -58,20 +67,34 @@ export const firebaseActionCreatorFactory = (prefix: string) => {
       firebase.firestore.DocumentReference
     >(`${eventPrefix}_REMOVE`);
 
+    const newActionCreator = <T>(type: string) => {
+      return factory<T>(`${eventPrefix}_${type}`);
+    };
+
     return {
-      add,
-      added: factory<SnapshotEventPayload<Doc>>(`${eventPrefix}_ADDED`),
-      collectionPath,
-      modified: factory<SnapshotEventPayload<Doc>>(`${eventPrefix}_MODIFIED`),
-      modify,
-      remove,
-      removed: factory<SnapshotEventPayload<Doc>>(`${eventPrefix}_REMOVED`),
-      subscribe: factory.async<SubscribeActionPayload, undefined>(
-        `${eventPrefix}_SUBSCRIBE`
-      ),
-      unsubscribe: factory.async<SubscribeActionPayload, undefined>(
-        `${eventPrefix}_UNSUBSCRIBE`
-      )
+      build: () => {
+        return {
+          add,
+          added: factory<SnapshotEventPayload<Doc>>(`${eventPrefix}_ADDED`),
+          collectionPath,
+          modified: factory<SnapshotEventPayload<Doc>>(
+            `${eventPrefix}_MODIFIED`
+          ),
+          modify,
+          newActionCreator,
+          remove,
+          removed: factory<SnapshotEventPayload<Doc>>(`${eventPrefix}_REMOVED`),
+          subscribe: factory.async<SubscribeActionPayload, undefined>(
+            `${eventPrefix}_SUBSCRIBE`
+          ),
+          unsubscribe: factory.async<SubscribeActionPayload, undefined>(
+            `${eventPrefix}_UNSUBSCRIBE`
+          )
+        };
+      },
+      create: <Params, Result, Error = {}>(type: string) => {
+        return factory.async<Params, Result, Error>(`${eventPrefix}_${type}`);
+      }
     };
   };
 

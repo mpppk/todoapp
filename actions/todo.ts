@@ -5,6 +5,9 @@ import { firebaseActionCreatorFactory } from './firestore';
 const todoActionCreatorFactory = actionCreatorFactory('TODO');
 
 export const todoActionCreators = {
+  changeNewMemberSearchUserNameInput: todoActionCreatorFactory<string>(
+    'CHANGE_NEW_MEMBER_SEARCH_USER_NAME_INPUT'
+  ),
   clickCloseTaskButton: todoActionCreatorFactory<Task>(
     'CLICK_CLOSE_TASK_BUTTON'
   ),
@@ -32,9 +35,9 @@ export const todoActionCreators = {
 };
 
 export const fbFactory = firebaseActionCreatorFactory('FIREBASE');
-export const projectCollectionActionCreator = fbFactory.firestore.collection<
-  Project
->('projects');
-export const taskCollectionActionCreator = fbFactory.firestore.collection<Task>(
-  'projects/{projectId}/tasks'
-);
+export const projectCollectionActionCreator = fbFactory.firestore
+  .collection<Project>('projects')
+  .build();
+export const taskCollectionActionCreator = fbFactory.firestore
+  .collection<Task>('projects/{projectId}/tasks')
+  .build();

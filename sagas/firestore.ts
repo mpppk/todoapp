@@ -17,6 +17,7 @@ import { Action } from 'typescript-fsa';
 import { bindAsyncAction } from 'typescript-fsa-redux-saga';
 import {
   CollectionActionCreator,
+  CollectionQueryActionCreators,
   SubscribeActionPayload
 } from '../actions/firestore';
 import { State } from '../reducer';
@@ -89,12 +90,17 @@ export type QueryBuilder<Context> = (
   collection: firebase.firestore.CollectionReference
 ) => firebase.firestore.Query;
 
-export interface QueryBuilders<Context> {
-  subscribe: QueryBuilder<Context>;
+export interface QueriesQueryBuilders<Context> {
+  [key: string]: QueryBuilder<Context>;
 }
 
-export interface DocParam<DocWithOutID> {
-  doc: DocWithOutID;
+export interface QueryBuilders<Context> {
+  subscribe: QueryBuilder<Context>;
+  queries: QueriesQueryBuilders<Context>;
+}
+
+export interface DocParam<T> {
+  doc: T;
   selectorParam: SubscribeActionPayload;
 }
 
@@ -109,6 +115,7 @@ const generateCollectionSelector = (collectionPath: string) => {
 
 const generateBypassQueryBuilders = <Context>() => {
   return {
+    queries: {},
     subscribe: (
       _context: Context,
       _state: State,
@@ -119,6 +126,7 @@ const generateBypassQueryBuilders = <Context>() => {
 
 export const bindFireStoreCollection = <Doc extends DocBase>(
   actionCreators: CollectionActionCreator<Doc>,
+  queryActionCreators: CollectionQueryActionCreators = {},
   queryBuilders: QueryBuilders<
     SubscribeActionPayload
   > = generateBypassQueryBuilders()
@@ -184,6 +192,24 @@ export const bindFireStoreCollection = <Doc extends DocBase>(
   }
 
   const opt = { skipStartedAction: true };
+  const queries = Object.keys(queryBuilders.queries).reduce<any>(
+    (acc, queryName) => {
+      acc[queryName] = bindAsyncAction(
+        queryActionCreators[queryName],
+        opt
+      )(function*(param) {
+        const state = yield select();
+        const collection = collectionSelector(getFirestore(), param as any); // FIXME
+        const query: firebase.firestore.Query = queryBuilders.queries[
+          queryName
+        ](param as any, state, collection);
+        return yield call(query.get.bind(query));
+      });
+      return acc;
+    },
+    {}
+  );
+
   return {
     add: bindAsyncAction(
       actionCreators.add,
@@ -200,9 +226,11 @@ export const bindFireStoreCollection = <Doc extends DocBase>(
       const context = { ...param.doc, ...param.selectorParam };
       const collection = collectionSelector(getFirestore(), context); // FIXME
       const doc = collection.doc(context.id);
-      return yield call(doc.set.bind(doc), param.doc);
+      // FIXME any
+      return yield call(doc.update.bind(doc) as any, param.doc);
     }),
     observe,
+    queries,
     remove: bindAsyncAction(
       actionCreators.remove,
       opt

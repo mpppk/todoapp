@@ -1,11 +1,11 @@
 import { createStyles, ListItemAvatar, Theme } from '@material-ui/core';
 import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import makeStyles from '@material-ui/core/styles/makeStyles';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { ClickEvent } from '../core/events';
 import { User } from '../reducer';
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -23,16 +23,24 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export interface ProjectMemberListProps {
   users: User[];
+  onChangeUser?: (user: User | null) => void;
 }
 
 export interface ProjectMemberListItemProps {
   user: User;
+  onClick: (e: ClickEvent) => void;
+  selected: boolean;
 }
 
 // tslint:disable-next-line variable-name
 const ProjectMemberListItem = (props: ProjectMemberListItemProps) => {
   return (
-    <ListItem alignItems="flex-start">
+    <ListItem
+      alignItems="flex-start"
+      onClick={props.onClick}
+      selected={props.selected}
+      button={true}
+    >
       <ListItemAvatar>
         <Avatar alt="Remy Sharp" src={props.user.photoURL} />
       </ListItemAvatar>
@@ -43,21 +51,37 @@ const ProjectMemberListItem = (props: ProjectMemberListItemProps) => {
 
 export default (props: ProjectMemberListProps) => {
   const classes = useStyles();
+
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  useEffect(() => {
+    setSelectedIndex(-1);
+
+    if (props.onChangeUser) {
+      props.onChangeUser(null);
+    }
+  }, [props.users]);
+
+  const generateListItemClickHandler = (user: User, index: number) => {
+    return () => {
+      setSelectedIndex(index);
+      if (props.onChangeUser) {
+        props.onChangeUser(user);
+      }
+    };
+  };
+
   return (
-    <div>
-      <List className={classes.root}>
-        {props.users.map(user => {
-          return (
-            <ProjectMemberListItem
-              key={'projectMemberListItem_' + user.id}
-              user={user}
-            />
-          );
-        })}
-      </List>
-      <Button variant={'outlined'} color={'secondary'}>
-        Add new member
-      </Button>
-    </div>
+    <List className={classes.root}>
+      {props.users.map((user, i) => {
+        return (
+          <ProjectMemberListItem
+            key={'projectMemberListItem_' + user.id}
+            onClick={generateListItemClickHandler(user, i)}
+            selected={selectedIndex === i}
+            user={user}
+          />
+        );
+      })}
+    </List>
   );
 };

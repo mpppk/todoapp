@@ -12,15 +12,29 @@ import {
   todoActionCreators
 } from '../../../actions/todo';
 import { userCollectionActionCreator } from '../../../actions/user';
+import AddNewMemberToProjectDialog from '../../../components/AddNewMemberToProjectDialog';
 import MyAppBar from '../../../components/AppBar';
 import ProjectMemberList from '../../../components/ProjectMemberList';
 import { ChangeEvent, EventHandler } from '../../../core/events';
 import { Project } from '../../../domain/todo';
-import { State } from '../../../reducer';
+import { State, User } from '../../../reducer';
 
 const useHandlers = () => {
   const dispatch = useDispatch();
   return {
+    addProjectMember: (user: User, projectId: string) => {
+      dispatch(
+        projectCollectionActionCreator.modify.started({
+          doc: {
+            [`members.${user.id}`]: 'projectReader'
+          },
+          selectorParam: { id: projectId }
+        })
+      );
+    },
+    changeUserNameInput: (username: string) => {
+      dispatch(todoActionCreators.changeNewMemberSearchUserNameInput(username));
+    },
     clickSaveProjectSettingsButton: (project: Project) => {
       dispatch(todoActionCreators.clickSaveProjectSettingsButton(project));
     },
@@ -41,7 +55,13 @@ const useReduxState = () => {
   return useSelector((state: State) => {
     const projects = state.global.projects ? state.global.projects : [];
     const project = projects.find(p => p.id === id);
+    const projectUserIds = state.projectsSettings.users.map(u => u.id);
+    const candidateUsers = state.projectsSettings.candidateUsers.filter(
+      user => !projectUserIds.includes(user.id)
+    );
+
     return {
+      candidateUsers,
       isReadyFirebase: state.global.isReadyFirebase,
       project,
       projectUsers: state.projectsSettings.users,
@@ -71,6 +91,15 @@ export default () => {
   const handlers = useHandlers();
   const state = useReduxState();
   const router = useRouter();
+  const [open, setOpen] = React.useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const handleClickSaveProjectSettingsButton = () => {
     if (state.user === null) {
@@ -115,6 +144,11 @@ export default () => {
   const handleChangeDescriptionInput: EventHandler<ChangeEvent> = e =>
     setDescription(e.target.value);
 
+  const handleClickAddButton = (user: User) => {
+    handlers.addProjectMember(user, state.project!.id);
+    handleClose();
+  };
+
   return (
     <div>
       <MyAppBar user={state.user} onClickLogout={handlers.requestToLogout} />
@@ -148,6 +182,13 @@ export default () => {
         <Grid item={true}>
           <Typography variant={'h4'}>Members</Typography>
           <ProjectMemberList users={state.projectUsers} />
+          <Button
+            variant={'outlined'}
+            color={'secondary'}
+            onClick={handleClickOpen}
+          >
+            Add new member
+          </Button>
         </Grid>
         <Grid item={true}>
           <Button
@@ -160,6 +201,13 @@ export default () => {
           </Button>
         </Grid>
       </Grid>
+      <AddNewMemberToProjectDialog
+        open={open}
+        onChangeUserNameInput={handlers.changeUserNameInput}
+        onClose={handleClose}
+        users={state.candidateUsers} // FIXME
+        onClickAddButton={handleClickAddButton}
+      />
     </div>
   );
 };
