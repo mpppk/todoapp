@@ -21,7 +21,7 @@ export interface CollectionActionCreator<Doc extends DocBase> {
   >;
   collectionPath: string;
   modify: AsyncActionCreators<
-    DocParam<Doc>,
+    DocParam<Partial<Doc>>,
     firebase.firestore.DocumentReference
   >;
   remove: AsyncActionCreators<
@@ -58,7 +58,7 @@ export const firebaseActionCreatorFactory = (prefix: string) => {
     >(`${eventPrefix}_ADD`);
 
     const modify = factory.async<
-      DocParam<Doc>,
+      DocParam<Partial<Doc>>,
       firebase.firestore.DocumentReference
     >(`${eventPrefix}_MODIFY`);
 

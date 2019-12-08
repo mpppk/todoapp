@@ -22,6 +22,16 @@ import { State, User } from '../../../reducer';
 const useHandlers = () => {
   const dispatch = useDispatch();
   return {
+    addProjectMember: (user: User, projectId: string) => {
+      dispatch(
+        projectCollectionActionCreator.modify.started({
+          doc: {
+            [`members.${user.id}`]: 'projectReader'
+          },
+          selectorParam: { id: projectId }
+        })
+      );
+    },
     changeUserNameInput: (username: string) => {
       dispatch(todoActionCreators.changeNewMemberSearchUserNameInput(username));
     },
@@ -135,8 +145,7 @@ export default () => {
     setDescription(e.target.value);
 
   const handleClickAddButton = (user: User) => {
-    // tslint:disable-next-line
-    console.log('new user', user);
+    handlers.addProjectMember(user, state.project!.id);
     handleClose();
   };
 

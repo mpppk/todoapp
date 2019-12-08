@@ -99,8 +99,8 @@ export interface QueryBuilders<Context> {
   queries: QueriesQueryBuilders<Context>;
 }
 
-export interface DocParam<DocWithOutID> {
-  doc: DocWithOutID;
+export interface DocParam<T> {
+  doc: T;
   selectorParam: SubscribeActionPayload;
 }
 
@@ -226,7 +226,8 @@ export const bindFireStoreCollection = <Doc extends DocBase>(
       const context = { ...param.doc, ...param.selectorParam };
       const collection = collectionSelector(getFirestore(), context); // FIXME
       const doc = collection.doc(context.id);
-      return yield call(doc.set.bind(doc), param.doc);
+      // FIXME any
+      return yield call(doc.update.bind(doc) as any, param.doc);
     }),
     observe,
     queries,
