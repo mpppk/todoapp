@@ -1,5 +1,6 @@
 import { createStyles, ListItemAvatar, Theme } from '@material-ui/core';
 import Avatar from '@material-ui/core/Avatar';
+import Button from '@material-ui/core/Button';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -43,15 +44,20 @@ const ProjectMemberListItem = (props: ProjectMemberListItemProps) => {
 export default (props: ProjectMemberListProps) => {
   const classes = useStyles();
   return (
-    <List className={classes.root}>
-      {props.users.map(user => {
-        return (
-          <ProjectMemberListItem
-            key={'projectMemberListItem_' + user.id}
-            user={user}
-          />
-        );
-      })}
-    </List>
+    <div>
+      <List className={classes.root}>
+        {props.users.map(user => {
+          return (
+            <ProjectMemberListItem
+              key={'projectMemberListItem_' + user.id}
+              user={user}
+            />
+          );
+        })}
+      </List>
+      <Button variant={'outlined'} color={'secondary'}>
+        Add new member
+      </Button>
+    </div>
   );
 };
