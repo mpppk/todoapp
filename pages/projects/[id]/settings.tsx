@@ -17,7 +17,7 @@ import MyAppBar from '../../../components/AppBar';
 import ProjectMemberList from '../../../components/ProjectMemberList';
 import { ChangeEvent, EventHandler } from '../../../core/events';
 import { Project } from '../../../domain/todo';
-import { State } from '../../../reducer';
+import { State, User } from '../../../reducer';
 
 const useHandlers = () => {
   const dispatch = useDispatch();
@@ -45,8 +45,13 @@ const useReduxState = () => {
   return useSelector((state: State) => {
     const projects = state.global.projects ? state.global.projects : [];
     const project = projects.find(p => p.id === id);
+    const projectUserIds = state.projectsSettings.users.map(u => u.id);
+    const candidateUsers = state.projectsSettings.candidateUsers.filter(
+      user => !projectUserIds.includes(user.id)
+    );
+
     return {
-      candidateUsers: state.projectsSettings.candidateUsers,
+      candidateUsers,
       isReadyFirebase: state.global.isReadyFirebase,
       project,
       projectUsers: state.projectsSettings.users,
@@ -129,6 +134,12 @@ export default () => {
   const handleChangeDescriptionInput: EventHandler<ChangeEvent> = e =>
     setDescription(e.target.value);
 
+  const handleClickAddButton = (user: User) => {
+    // tslint:disable-next-line
+    console.log('new user', user);
+    handleClose();
+  };
+
   return (
     <div>
       <MyAppBar user={state.user} onClickLogout={handlers.requestToLogout} />
@@ -186,6 +197,7 @@ export default () => {
         onChangeUserNameInput={handlers.changeUserNameInput}
         onClose={handleClose}
         users={state.candidateUsers} // FIXME
+        onClickAddButton={handleClickAddButton}
       />
     </div>
   );
