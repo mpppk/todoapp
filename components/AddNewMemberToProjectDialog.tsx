@@ -6,7 +6,7 @@ import TextField from '@material-ui/core/TextField';
 import React, { useState } from 'react';
 import { ChangeEvent } from '../core/events';
 import { User } from '../domain/user';
-import ProjectMemberList from './ProjectMemberList';
+import CandidateProjectMemberList from './CandidateProjectMemberList';
 
 interface AddNewMemberToProjectDialogProps {
   open: boolean;
@@ -50,7 +50,7 @@ export default function AddNewMemberToProjectDialog(
           variant={'outlined'}
           onChange={handleChangeUserNameInput}
         />
-        <ProjectMemberList
+        <CandidateProjectMemberList
           users={props.users}
           onChangeUser={handleChangeUser}
         />

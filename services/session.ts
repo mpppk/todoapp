@@ -38,6 +38,8 @@ export const getFirebaseUIConfig = () => {
   };
 };
 
+export const FieldValue = firebase.firestore.FieldValue;
+
 let db: firebase.firestore.Firestore | null = null;
 export const getFirestore = () => {
   if (db === null) {

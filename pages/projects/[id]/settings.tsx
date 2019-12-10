@@ -18,7 +18,8 @@ import ProjectMemberList from '../../../components/ProjectMemberList';
 import { ChangeEvent, EventHandler } from '../../../core/events';
 import { Project } from '../../../domain/todo';
 import { User } from '../../../domain/user';
-import { State } from '../../../reducers/reducer';
+import { State } from '../../../reducers/reducer'
+import { FieldValue } from '../../../services/session';
 
 const useHandlers = () => {
   const dispatch = useDispatch();
@@ -39,6 +40,16 @@ const useHandlers = () => {
     clickSaveProjectSettingsButton: (project: Project) => {
       dispatch(todoActionCreators.clickSaveProjectSettingsButton(project));
     },
+    removeMember: (projectId: string, user: User) => {
+      dispatch(
+        projectCollectionActionCreator.modify.started({
+          doc: {
+            [`members.${user.id}`]: FieldValue.delete()
+          },
+          selectorParam: { id: projectId }
+        })
+      );
+    },
     requestToInitializeFirebase: () => {
       dispatch(sessionActionCreators.requestToInitializeFirebase());
     },
@@ -46,7 +57,17 @@ const useHandlers = () => {
     subscribeProject: () =>
       dispatch(projectCollectionActionCreator.subscribe.started({})),
     subscribeProjectUser: (projectId: string) =>
-      dispatch(userCollectionActionCreator.subscribe.started({ projectId }))
+      dispatch(userCollectionActionCreator.subscribe.started({ projectId })),
+    updateMember: (projectId: string, user: User) => {
+      dispatch(
+        projectCollectionActionCreator.modify.started({
+          doc: {
+            [`members.${user.id}`]: 'projectReader' // FIXME
+          },
+          selectorParam: { id: projectId }
+        })
+      );
+    }
   };
 };
 
@@ -150,6 +171,18 @@ export default () => {
     handleClose();
   };
 
+  const handleClickEditMemberButton = (user: User) => {
+    if (state.project) {
+      handlers.updateMember(state.project.id, user);
+    }
+  };
+
+  const handleClickRemoveMemberButton = (user: User) => {
+    if (state.project) {
+      handlers.removeMember(state.project.id, user);
+    }
+  };
+
   return (
     <div>
       <MyAppBar user={state.user} onClickLogout={handlers.requestToLogout} />
@@ -182,7 +215,11 @@ export default () => {
         </Grid>
         <Grid item={true}>
           <Typography variant={'h4'}>Members</Typography>
-          <ProjectMemberList users={state.projectUsers} />
+          <ProjectMemberList
+            users={state.projectUsers}
+            onClickEditMemberButton={handleClickEditMemberButton}
+            onClickRemoveMemberButton={handleClickRemoveMemberButton}
+          />
           <Button
             variant={'outlined'}
             color={'secondary'}
