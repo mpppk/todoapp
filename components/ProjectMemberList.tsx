@@ -1,12 +1,15 @@
 import { createStyles, ListItemAvatar, Theme } from '@material-ui/core';
 import Avatar from '@material-ui/core/Avatar';
+import IconButton from '@material-ui/core/IconButton';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
 import makeStyles from '@material-ui/core/styles/makeStyles';
-import React, { useEffect, useState } from 'react';
-import { ClickEvent } from '../core/events';
+import MoreHoriz from '@material-ui/icons/MoreHorizOutlined';
+import React, { useState } from 'react';
 import { User } from '../reducer';
+import { ProjectMemberMenu } from './ProjectMemberMenu';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -23,65 +26,86 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export interface ProjectMemberListProps {
   users: User[];
-  onChangeUser?: (user: User | null) => void;
+  onClickEditMemberButton: (user: User) => void;
+  onClickRemoveMemberButton: (user: User) => void;
 }
 
 export interface ProjectMemberListItemProps {
   user: User;
-  onClick: (e: ClickEvent) => void;
-  selected: boolean;
+  onClickMoreButton: (e: React.MouseEvent<HTMLElement>, user: User) => void;
 }
 
 // tslint:disable-next-line variable-name
 const ProjectMemberListItem = (props: ProjectMemberListItemProps) => {
+  const handleClickMoreButton = (e: React.MouseEvent<HTMLElement>) => {
+    props.onClickMoreButton(e, props.user);
+  };
+
   return (
-    <ListItem
-      alignItems="flex-start"
-      onClick={props.onClick}
-      selected={props.selected}
-      button={true}
-    >
+    <ListItem alignItems="flex-start" button={true}>
       <ListItemAvatar>
         <Avatar alt="Remy Sharp" src={props.user.photoURL} />
       </ListItemAvatar>
       <ListItemText primary={props.user.displayName} secondary="owner" />
+      <ListItemSecondaryAction onClick={handleClickMoreButton}>
+        <IconButton>
+          <MoreHoriz />
+        </IconButton>
+      </ListItemSecondaryAction>
     </ListItem>
   );
 };
 
 export default (props: ProjectMemberListProps) => {
   const classes = useStyles();
+  const [currentMember, setCurrentMember] = useState(
+    undefined as User | undefined
+  );
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const setNullAnchorEl = () => setAnchorEl(null);
 
-  const [selectedIndex, setSelectedIndex] = useState(-1);
-  useEffect(() => {
-    setSelectedIndex(-1);
+  const handleClickMoreButton = (
+    e: React.MouseEvent<HTMLElement>,
+    user: User
+  ) => {
+    setCurrentMember(user);
+    setAnchorEl(e.currentTarget);
+  };
 
-    if (props.onChangeUser) {
-      props.onChangeUser(null);
+  const handleClickRemoveMemberButton = () => {
+    if (currentMember) {
+      props.onClickRemoveMemberButton(currentMember);
     }
-  }, [props.users]);
+    setNullAnchorEl();
+  };
 
-  const generateListItemClickHandler = (user: User, index: number) => {
-    return () => {
-      setSelectedIndex(index);
-      if (props.onChangeUser) {
-        props.onChangeUser(user);
-      }
-    };
+  const handleClickEditMemberButton = () => {
+    if (currentMember) {
+      props.onClickEditMemberButton(currentMember);
+    }
+    setNullAnchorEl();
   };
 
   return (
-    <List className={classes.root}>
-      {props.users.map((user, i) => {
-        return (
-          <ProjectMemberListItem
-            key={'projectMemberListItem_' + user.id}
-            onClick={generateListItemClickHandler(user, i)}
-            selected={selectedIndex === i}
-            user={user}
-          />
-        );
-      })}
-    </List>
+    <div>
+      <List className={classes.root}>
+        {props.users.map(user => {
+          return (
+            <ProjectMemberListItem
+              key={'projectMemberListItem_' + user.id}
+              user={user}
+              onClickMoreButton={handleClickMoreButton}
+            />
+          );
+        })}
+      </List>
+      <ProjectMemberMenu
+        id={`project-member-menu-${currentMember ? currentMember.id : ''}`}
+        anchorEl={anchorEl}
+        onClose={setNullAnchorEl}
+        onClickDelete={handleClickRemoveMemberButton}
+        onClickEdit={handleClickEditMemberButton}
+      />
+    </div>
   );
 };

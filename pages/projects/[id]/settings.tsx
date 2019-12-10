@@ -38,6 +38,9 @@ const useHandlers = () => {
     clickSaveProjectSettingsButton: (project: Project) => {
       dispatch(todoActionCreators.clickSaveProjectSettingsButton(project));
     },
+    deleteUser: (user: User) => {
+      dispatch(userCollectionActionCreator.remove.started({ id: user.id }));
+    },
     requestToInitializeFirebase: () => {
       dispatch(sessionActionCreators.requestToInitializeFirebase());
     },
@@ -149,6 +152,14 @@ export default () => {
     handleClose();
   };
 
+  const handleClickEditMemberButton = (user: User) => {
+    console.log(user);
+  };
+
+  const handleClickRemoveMemberButton = (user: User) => {
+    console.log(user);
+  };
+
   return (
     <div>
       <MyAppBar user={state.user} onClickLogout={handlers.requestToLogout} />
@@ -181,7 +192,11 @@ export default () => {
         </Grid>
         <Grid item={true}>
           <Typography variant={'h4'}>Members</Typography>
-          <ProjectMemberList users={state.projectUsers} />
+          <ProjectMemberList
+            users={state.projectUsers}
+            onClickEditMemberButton={handleClickEditMemberButton}
+            onClickRemoveMemberButton={handleClickRemoveMemberButton}
+          />
           <Button
             variant={'outlined'}
             color={'secondary'}
