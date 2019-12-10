@@ -3,7 +3,8 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { sessionActionCreators } from '../actions/session';
 import SignInScreen from '../components/SignInScreen';
-import { State, User } from '../reducer';
+import { User } from '../domain/user';
+import { State } from '../reducers/reducer';
 
 export default () => {
   const user: User | null = useSelector((state: State) => state.global.user);

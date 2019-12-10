@@ -5,7 +5,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import TextField from '@material-ui/core/TextField';
 import React, { useState } from 'react';
 import { ChangeEvent } from '../core/events';
-import { User } from '../reducer';
+import { User } from '../domain/user';
 import ProjectMemberList from './ProjectMemberList';
 
 interface AddNewMemberToProjectDialogProps {

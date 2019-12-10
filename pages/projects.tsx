@@ -9,7 +9,7 @@ import {
 import MyAppBar from '../components/AppBar';
 import { Projects } from '../components/todo/Projects';
 import { Project } from '../domain/todo';
-import { State } from '../reducer';
+import { State } from '../reducers/reducer';
 
 const useHandlers = () => {
   const dispatch = useDispatch();

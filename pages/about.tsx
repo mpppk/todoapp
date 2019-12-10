@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { sessionActionCreators } from '../actions/session';
 import MyAppBar from '../components/AppBar';
-import { State } from '../reducer';
+import { State } from '../reducers/reducer';
 
 const useHandlers = () => {
   const dispatch = useDispatch();

@@ -20,7 +20,7 @@ import {
   CollectionQueryActionCreators,
   SubscribeActionPayload
 } from '../actions/firestore';
-import { State } from '../reducer';
+import { State } from '../reducers/reducer';
 import { parseCollectionPath } from '../services/firestore';
 import { getFirestore } from '../services/session';
 

@@ -5,7 +5,7 @@ import { useState } from 'react';
 import * as React from 'react';
 import { ChangeEvent, ClickEvent, EventHandler } from '../core/events';
 import { Task as TaskEntity, TaskDraft } from '../domain/todo';
-import { User } from '../reducer';
+import { User } from '../domain/user';
 import { Task } from './todo/Task';
 import { WritableTask } from './todo/WritableTask';
 

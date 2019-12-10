@@ -8,7 +8,7 @@ import {
   userCollectionActionCreator,
   userCollectionQueryActionCreators
 } from '../actions/user';
-import { State } from '../reducer';
+import { State } from '../reducers/reducer';
 import { bindFireStoreCollection, takeEveryStartedAction } from './firestore';
 
 const usersQueryBuilder = (

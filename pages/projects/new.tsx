@@ -11,7 +11,7 @@ import { sessionActionCreators } from '../../actions/session';
 import MyAppBar from '../../components/AppBar';
 import { ChangeEvent, ClickEvent, EventHandler } from '../../core/events';
 import { ProjectDraft } from '../../domain/todo';
-import { State } from '../../reducer';
+import { State } from '../../reducers/reducer';
 
 const useHandlers = () => {
   const dispatch = useDispatch();

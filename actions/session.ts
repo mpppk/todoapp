@@ -1,5 +1,5 @@
 import actionCreatorFactory from 'typescript-fsa';
-import { User } from '../reducer';
+import { User } from '../domain/user';
 
 const sessionActionCreatorFactory = actionCreatorFactory('SESSION');
 

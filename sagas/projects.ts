@@ -3,7 +3,7 @@ import * as firebase from 'firebase';
 import { SubscribeActionPayload } from '../actions/firestore';
 import { sessionActionCreators } from '../actions/session';
 import { projectCollectionActionCreator } from '../actions/todo';
-import { State } from '../reducer';
+import { State } from '../reducers/reducer';
 import { bindFireStoreCollection, takeEveryStartedAction } from './firestore';
 
 const projectsQueryBuilder = (
