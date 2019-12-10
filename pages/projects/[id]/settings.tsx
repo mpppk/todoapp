@@ -18,6 +18,7 @@ import ProjectMemberList from '../../../components/ProjectMemberList';
 import { ChangeEvent, EventHandler } from '../../../core/events';
 import { Project } from '../../../domain/todo';
 import { State, User } from '../../../reducer';
+import { FieldValue } from '../../../services/session';
 
 const useHandlers = () => {
   const dispatch = useDispatch();
@@ -38,8 +39,15 @@ const useHandlers = () => {
     clickSaveProjectSettingsButton: (project: Project) => {
       dispatch(todoActionCreators.clickSaveProjectSettingsButton(project));
     },
-    deleteUser: (user: User) => {
-      dispatch(userCollectionActionCreator.remove.started({ id: user.id }));
+    removeMember: (projectId: string, user: User) => {
+      dispatch(
+        projectCollectionActionCreator.modify.started({
+          doc: {
+            [`members.${user.id}`]: FieldValue.delete()
+          },
+          selectorParam: { id: projectId }
+        })
+      );
     },
     requestToInitializeFirebase: () => {
       dispatch(sessionActionCreators.requestToInitializeFirebase());
@@ -48,7 +56,17 @@ const useHandlers = () => {
     subscribeProject: () =>
       dispatch(projectCollectionActionCreator.subscribe.started({})),
     subscribeProjectUser: (projectId: string) =>
-      dispatch(userCollectionActionCreator.subscribe.started({ projectId }))
+      dispatch(userCollectionActionCreator.subscribe.started({ projectId })),
+    updateMember: (projectId: string, user: User) => {
+      dispatch(
+        projectCollectionActionCreator.modify.started({
+          doc: {
+            [`members.${user.id}`]: 'projectReader' // FIXME
+          },
+          selectorParam: { id: projectId }
+        })
+      );
+    }
   };
 };
 
@@ -153,11 +171,15 @@ export default () => {
   };
 
   const handleClickEditMemberButton = (user: User) => {
-    console.log(user);
+    if (state.project) {
+      handlers.updateMember(state.project.id, user);
+    }
   };
 
   const handleClickRemoveMemberButton = (user: User) => {
-    console.log(user);
+    if (state.project) {
+      handlers.removeMember(state.project.id, user);
+    }
   };
 
   return (
