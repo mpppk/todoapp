@@ -2,7 +2,7 @@ import { Avatar, Theme } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/styles';
 import React from 'react';
-import { User } from '../reducer';
+import { User } from '../domain/user';
 import ProfileMenu from './ProfileMenu';
 
 export interface ProfileButtonProps {

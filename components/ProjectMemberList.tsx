@@ -8,7 +8,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import MoreHoriz from '@material-ui/icons/MoreHorizOutlined';
 import React, { useState } from 'react';
-import { User } from '../reducer';
+import { User } from '../domain/user';
 import { ProjectMemberMenu } from './ProjectMemberMenu';
 
 const useStyles = makeStyles((theme: Theme) =>

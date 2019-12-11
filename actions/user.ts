@@ -1,4 +1,4 @@
-import { User } from '../reducer';
+import { User } from '../domain/user';
 import { CollectionQueryActionCreators } from './firestore';
 import { fbFactory } from './todo';
 

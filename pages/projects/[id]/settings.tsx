@@ -17,7 +17,8 @@ import MyAppBar from '../../../components/AppBar';
 import ProjectMemberList from '../../../components/ProjectMemberList';
 import { ChangeEvent, EventHandler } from '../../../core/events';
 import { Project } from '../../../domain/todo';
-import { State, User } from '../../../reducer';
+import { User } from '../../../domain/user';
+import { State } from '../../../reducers/reducer'
 import { FieldValue } from '../../../services/session';
 
 const useHandlers = () => {
