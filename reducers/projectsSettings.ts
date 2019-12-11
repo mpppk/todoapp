@@ -6,7 +6,6 @@ import {
 } from '../actions/user';
 import { User } from '../domain/user';
 import { compareById } from '../services/util';
-import { initialState } from './reducer';
 
 export const projectsSettingsState = {
   candidateUsers: [] as User[],
@@ -28,7 +27,7 @@ const replaceUsers = (
 };
 
 export const projectsSettingsReducer = reducerWithInitialState(
-  initialState.projectsSettings
+  projectsSettingsState
 )
   .case(userCollectionActionCreator.added, replaceUsers)
   .case(

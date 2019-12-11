@@ -8,9 +8,7 @@ import {
 } from '../actions/todo';
 import { Project, Task } from '../domain/todo';
 import { User } from '../domain/user';
-import { initialState } from '../reducers/reducer';
 
-export type GlobalState = typeof initialState.global;
 export const globalState = {
   editTaskId: null as string | null,
   isReadyFirebase: false,
@@ -18,6 +16,7 @@ export const globalState = {
   tasks: null as Tasks | null,
   user: null as User | null
 };
+export type GlobalState = typeof globalState;
 
 interface Tasks {
   [key: string]: Task[];
@@ -95,7 +94,7 @@ const removeTasks = (
   return { ...state, tasks: newTasks };
 };
 
-export const globalReducer = reducerWithInitialState(initialState.global)
+export const globalReducer = reducerWithInitialState(globalState)
   .case(todoActionCreators.clickEditTaskButton, (state, task) => {
     return { ...state, editTaskId: task.id };
   })

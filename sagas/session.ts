@@ -8,7 +8,7 @@ import {
   sessionAsyncActionCreators,
   UpdateUserPayload
 } from '../actions/session';
-import { User } from '../reducers/reducer';
+import { User } from '../domain/user';
 import {
   fromFirebaseUserToUser,
   getFirestore,
