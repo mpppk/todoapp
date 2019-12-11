@@ -6,7 +6,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import React, { useEffect, useState } from 'react';
 import { ClickEvent } from '../core/events';
-import { User } from '../reducer';
+import { User } from '../domain/user';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
