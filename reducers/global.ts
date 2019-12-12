@@ -22,11 +22,15 @@ interface Tasks {
   [key: string]: Task[];
 }
 
-const updateProjects = (projects: Project[], newProjects: Project[]) => {
+export const updateProjects = (projects: Project[], newProjects: Project[]) => {
   return newProjects.reduce(
-    (acc, project) => {
-      const index = acc.findIndex(p => p.id === project.id);
-      return index === -1 ? [...acc, project] : acc.splice(index, 1, project);
+    (acc, newProject) => {
+      const index = acc.findIndex(p => p.id === newProject.id);
+      if (index === -1) {
+        return [...acc, newProject];
+      }
+      acc.splice(index, 1, newProject);
+      return acc;
     },
     [...projects]
   );

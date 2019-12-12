@@ -11,8 +11,8 @@ import {
 import MyAppBar from '../../components/AppBar';
 import Page from '../../components/Page';
 import { Task, TaskDraft } from '../../domain/todo';
+import { GlobalState } from '../../reducers/global';
 import { State } from '../../reducers/reducer';
-import { GlobalState } from '../../services/global';
 
 const useHandlers = () => {
   const dispatch = useDispatch();
