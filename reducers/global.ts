@@ -8,6 +8,7 @@ import {
 } from '../actions/todo';
 import { Project, Task } from '../domain/todo';
 import { User } from '../domain/user';
+import { replaceDocument, updateDocuments } from '../services/firestore';
 
 export const globalState = {
   editTaskId: null as string | null,
@@ -22,26 +23,16 @@ interface Tasks {
   [key: string]: Task[];
 }
 
-const updateProjects = (projects: Project[], newProjects: Project[]) => {
-  return newProjects.reduce(
-    (acc, project) => {
-      const index = acc.findIndex(p => p.id === project.id);
-      return index === -1 ? [...acc, project] : acc.splice(index, 1, project);
-    },
-    [...projects]
-  );
-};
-
-const replaceProject = (
-  projects: Project[],
-  newProject: Project
-): Project[] => {
-  const index = projects.findIndex(p => p.id === newProject.id);
-  if (index !== -1) {
-    projects[index] = newProject;
-  }
-  return projects;
-};
+// const replaceProject = (
+//   projects: Project[],
+//   newProject: Project
+// ): Project[] => {
+//   const index = projects.findIndex(p => p.id === newProject.id);
+//   if (index !== -1) {
+//     projects[index] = newProject;
+//   }
+//   return projects;
+// };
 
 const replaceProjects = (
   orgState: GlobalState,
@@ -51,7 +42,7 @@ const replaceProjects = (
   if (!state.projects) {
     return state;
   }
-  state.projects = payload.docs.reduce(replaceProject, state.projects);
+  state.projects = payload.docs.reduce(replaceDocument, state.projects);
   return state;
 };
 
@@ -107,7 +98,10 @@ export const globalReducer = reducerWithInitialState(globalState)
   .case(taskCollectionActionCreator.added, replaceTasks)
   .case(projectCollectionActionCreator.added, (state, payload) => {
     const beforeProjects = state.projects ? state.projects : [];
-    return { ...state, projects: updateProjects(beforeProjects, payload.docs) };
+    return {
+      ...state,
+      projects: updateDocuments(beforeProjects, payload.docs)
+    };
   })
   .case(taskCollectionActionCreator.modified, replaceTasks)
   .case(taskCollectionActionCreator.removed, removeTasks)

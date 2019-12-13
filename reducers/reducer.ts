@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux';
-import { globalReducer, globalState } from '../services/global';
+import { globalReducer, globalState } from './global';
 import { projectsNewReducer, projectsNewState } from './projectsNew';
 import {
   projectsSettingsReducer,

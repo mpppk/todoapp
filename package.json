@@ -13,6 +13,7 @@
     "tslint": "tslint -c tslint.json 'src/**/*.ts' 'src/**/*.tsx' 'test/**/*.ts'",
     "export": "yarn build && next export",
     "deploy-rules": "firebase deploy --only firestore:rules",
+    "setup-firestore-emulator": "firebase setup:emulators:firestore",
     "serve-firestore": "firebase emulators:start --only firestore"
   },
   "dependencies": {
@@ -53,6 +54,7 @@
     "@types/react-redux": "7.1.5",
     "enzyme": "3.10.0",
     "enzyme-adapter-react-16": "1.15.1",
+    "firebase-tools": "^7.9.0",
     "husky": "3.1.0",
     "jest": "24.9.0",
     "prettier": "1.19.1",
