@@ -1,6 +1,7 @@
 import { Project } from '../../domain/todo';
 import {
   parseCollectionPath,
+  removeDocuments,
   replaceDocument,
   updateDocuments
 } from '../../services/firestore';
@@ -91,5 +92,25 @@ describe('replaceDocument', () => {
     expect(updatedDocuments).toHaveLength(2);
     expect(updatedDocuments[0]).toBe(doc1);
     expect(updatedDocuments[1]).toBe(newDoc);
+  });
+});
+
+describe('removeDocuments', () => {
+  const doc1 = { id: 'id1', title: 'a' };
+  const doc2 = { id: 'id2', title: 'b' };
+  const documents = [doc1, doc2];
+
+  it('remove first document by id', async () => {
+    const remDocs = [{ id: 'id1', title: 'remDocument' }];
+    const newDocuments = removeDocuments(documents, remDocs);
+    expect(newDocuments).toHaveLength(1);
+    expect(newDocuments[0]).toBe(doc2);
+  });
+
+  it('remove last document by id', async () => {
+    const remDocs = [{ id: 'id2', title: 'remDocument' }];
+    const newDocuments = removeDocuments(documents, remDocs);
+    expect(newDocuments).toHaveLength(1);
+    expect(newDocuments[0]).toBe(doc1);
   });
 });
