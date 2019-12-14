@@ -50,3 +50,11 @@ export const replaceDocument = <T extends Document>(
   }
   return documents;
 };
+
+export const removeDocuments = <T extends Document>(
+  documents: T[],
+  remDocuments: T[]
+): T[] => {
+  const ids = remDocuments.map(doc => doc.id);
+  return documents.filter(p => !ids.includes(p.id));
+};

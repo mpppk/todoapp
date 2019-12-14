@@ -8,7 +8,11 @@ import {
 } from '../actions/todo';
 import { Project, Task } from '../domain/todo';
 import { User } from '../domain/user';
-import { replaceDocument, updateDocuments } from '../services/firestore';
+import {
+  removeDocuments,
+  replaceDocument,
+  updateDocuments
+} from '../services/firestore';
 
 export const globalState = {
   editTaskId: null as string | null,
@@ -22,17 +26,6 @@ export type GlobalState = typeof globalState;
 interface Tasks {
   [key: string]: Task[];
 }
-
-// const replaceProject = (
-//   projects: Project[],
-//   newProject: Project
-// ): Project[] => {
-//   const index = projects.findIndex(p => p.id === newProject.id);
-//   if (index !== -1) {
-//     projects[index] = newProject;
-//   }
-//   return projects;
-// };
 
 const replaceProjects = (
   orgState: GlobalState,
@@ -110,8 +103,7 @@ export const globalReducer = reducerWithInitialState(globalState)
     if (state.projects === null) {
       return { ...state };
     }
-    const ids = payload.docs.map(doc => doc.id);
-    const projects = state.projects.filter(p => !ids.includes(p.id));
+    const projects = removeDocuments(state.projects, payload.docs);
     return { ...state, projects };
   })
   .case(sessionActionCreators.finishFirebaseInitializing, state => {
