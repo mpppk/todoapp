@@ -6,6 +6,7 @@ export const toDraft = (task: Task): TaskDraft => {
 };
 
 export type TaskID = ID;
+
 export interface ID {
   id: string;
 }
@@ -20,8 +21,13 @@ export interface TaskDraft {
 export type ProjectID = ID;
 export type Project = ProjectID & ProjectDraft;
 export type ProjectRoles = 'projectOwner' | 'projectWriter' | 'projectReader';
+
+export interface ProjectMembers {
+  [key: string]: ProjectRoles;
+}
+
 export interface ProjectDraft {
   title: string;
   description: string;
-  members: { [key: string]: ProjectRoles };
+  members: ProjectMembers;
 }
