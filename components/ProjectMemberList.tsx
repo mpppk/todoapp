@@ -26,6 +26,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export interface ProjectMemberListProps {
   users: User[];
+  updatingUser: User | undefined;
   onClickEditMemberButton: (user: User) => void;
   onClickRemoveMemberButton: (user: User) => void;
 }
@@ -47,6 +48,27 @@ const ProjectMemberListItem = (props: ProjectMemberListItemProps) => {
         <Avatar alt="Remy Sharp" src={props.user.photoURL} />
       </ListItemAvatar>
       <ListItemText primary={props.user.displayName} secondary="owner" />
+      <ListItemSecondaryAction onClick={handleClickMoreButton}>
+        <IconButton>
+          <MoreHoriz />
+        </IconButton>
+      </ListItemSecondaryAction>
+    </ListItem>
+  );
+};
+
+// tslint:disable-next-line variable-name
+const UpdatingProjectMemberListItem = (props: ProjectMemberListItemProps) => {
+  const handleClickMoreButton = (e: React.MouseEvent<HTMLElement>) => {
+    props.onClickMoreButton(e, props.user);
+  };
+
+  return (
+    <ListItem alignItems="flex-start" button={true} disabled={true}>
+      <ListItemAvatar>
+        <Avatar alt="Remy Sharp" src={props.user.photoURL} />
+      </ListItemAvatar>
+      <ListItemText primary={props.user.displayName} secondary="updating..." />
       <ListItemSecondaryAction onClick={handleClickMoreButton}>
         <IconButton>
           <MoreHoriz />
@@ -98,6 +120,13 @@ export default (props: ProjectMemberListProps) => {
             />
           );
         })}
+        {props.updatingUser ? (
+          <UpdatingProjectMemberListItem
+            key={'projectMemberListItem_updating_' + props.updatingUser.id}
+            user={props.updatingUser}
+            onClickMoreButton={handleClickMoreButton}
+          />
+        ) : null}
       </List>
       <ProjectMemberMenu
         id={`project-member-menu-${currentMember ? currentMember.id : ''}`}
