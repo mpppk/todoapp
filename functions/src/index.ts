@@ -1,1 +1,5 @@
-export { createProject, updateProject, deleteProject } from './projects/util';
+export {
+  createProject,
+  updateProject,
+  deleteProject
+} from './projects/handlers';

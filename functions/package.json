@@ -7,6 +7,7 @@
     "serve": "firebase serve --only functions",
     "shell": "yarn build && firebase functions:shell",
     "start": "yarn shell",
+    "test": "jest",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log"
   },
