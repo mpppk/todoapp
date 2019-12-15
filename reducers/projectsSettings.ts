@@ -1,11 +1,10 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import { SnapshotEventPayload } from '../actions/firestore';
 import {
   userCollectionActionCreator,
   userCollectionQueryActionCreators
 } from '../actions/user';
 import { User } from '../domain/user';
-import { compareById } from '../services/util';
+import { removeDocuments, updateDocuments } from '../services/firestore';
 
 export const projectsSettingsState = {
   candidateUsers: [] as User[],
@@ -13,23 +12,20 @@ export const projectsSettingsState = {
 };
 export type ProjectsSettingsPageState = typeof projectsSettingsState;
 
-const replaceUsers = (
-  state: ProjectsSettingsPageState,
-  payload: SnapshotEventPayload<User>
-): ProjectsSettingsPageState => {
-  const prevUsers = state.users;
-  const newUsers = payload.docs;
-  const filteredUsers = prevUsers.filter(
-    pu => !newUsers.map(u => u.id).includes(pu.id)
-  );
-  const users = [...filteredUsers, ...newUsers].sort(compareById);
-  return { ...state, users };
-};
-
 export const projectsSettingsReducer = reducerWithInitialState(
   projectsSettingsState
 )
-  .case(userCollectionActionCreator.added, replaceUsers)
+  .cases(
+    [userCollectionActionCreator.added, userCollectionActionCreator.modified],
+    (state, payload) => ({
+      ...state,
+      users: updateDocuments(state.users, payload.docs)
+    })
+  )
+  .case(userCollectionActionCreator.removed, (state, payload) => ({
+    ...state,
+    users: removeDocuments(state.users, payload.docs)
+  }))
   .case(
     userCollectionQueryActionCreators.searchProjectMemberCandidate.done,
     (state, payload) => {
