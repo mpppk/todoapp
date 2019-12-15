@@ -18,7 +18,7 @@ import ProjectMemberList from '../../../components/ProjectMemberList';
 import { ChangeEvent, EventHandler } from '../../../core/events';
 import { Project } from '../../../domain/todo';
 import { User } from '../../../domain/user';
-import { State } from '../../../reducers/reducer'
+import { State } from '../../../reducers/reducer';
 import { FieldValue } from '../../../services/session';
 
 const useHandlers = () => {
@@ -149,6 +149,7 @@ export default () => {
     }
   }, [state.isReadyFirebase, state.user]);
 
+  const [updatingMember, setUpdatingMember] = useState(null as User | null);
   const [title, setTitle] = useState(state.project ? state.project.title : '');
   const [description, setDescription] = useState(
     state.project ? state.project.description : ''
@@ -161,12 +162,19 @@ export default () => {
     }
   }, [state.isReadyFirebase, state.project]);
 
+  useEffect(() => {
+    if (updatingMember) {
+      setUpdatingMember(null);
+    }
+  }, [state.projectUsers]);
+
   const handleChangeTitleInput: EventHandler<ChangeEvent> = e =>
     setTitle(e.target.value);
   const handleChangeDescriptionInput: EventHandler<ChangeEvent> = e =>
     setDescription(e.target.value);
 
   const handleClickAddButton = (user: User) => {
+    setUpdatingMember(user);
     handlers.addProjectMember(user, state.project!.id);
     handleClose();
   };
@@ -179,9 +187,15 @@ export default () => {
 
   const handleClickRemoveMemberButton = (user: User) => {
     if (state.project) {
+      setUpdatingMember(user);
       handlers.removeMember(state.project.id, user);
     }
   };
+
+  let projectUsers = state.projectUsers;
+  if (updatingMember) {
+    projectUsers = projectUsers.filter(u => u.id !== updatingMember.id);
+  }
 
   return (
     <div>
@@ -216,11 +230,13 @@ export default () => {
         <Grid item={true}>
           <Typography variant={'h4'}>Members</Typography>
           <ProjectMemberList
-            users={state.projectUsers}
+            users={projectUsers}
+            updatingUser={updatingMember ? updatingMember : undefined}
             onClickEditMemberButton={handleClickEditMemberButton}
             onClickRemoveMemberButton={handleClickRemoveMemberButton}
           />
           <Button
+            disabled={!!updatingMember}
             variant={'outlined'}
             color={'secondary'}
             onClick={handleClickOpen}
@@ -230,7 +246,7 @@ export default () => {
         </Grid>
         <Grid item={true}>
           <Button
-            disabled={!state.project}
+            disabled={!state.project || !!updatingMember}
             variant={'outlined'}
             color={'primary'}
             onClick={handleClickSaveProjectSettingsButton}
