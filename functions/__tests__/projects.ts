@@ -50,7 +50,7 @@ describe('getUserUpdateDataFromNewProject', () => {
   it('return valid member updates', async () => {
     const project = {
       id: 'p1',
-      members: {
+      memberRoles: {
         alice: 'projectReader',
         bob: 'projectOwner'
       } as ProjectMemberRoles,
@@ -99,7 +99,7 @@ describe('getUserUpdateDataFromDeletedProject', () => {
   it('return valid member updates', async () => {
     const project = {
       id: 'p1',
-      members: {
+      memberRoles: {
         alice: 'projectReader',
         bob: 'projectOwner'
       } as ProjectMemberRoles,
