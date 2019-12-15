@@ -9,6 +9,7 @@ export interface UserUpdate {
 }
 
 export interface MembersDiff {
+  addedMembers: ProjectMembers;
   removedMemberIDs: string[];
   updatedMembers: ProjectMembers;
 }
@@ -18,19 +19,31 @@ export const calcDiffMembers = (
   afterMembers: ProjectMembers
 ): MembersDiff => {
   const afterMemberIDs = Object.keys(afterMembers);
+  const addedMembers = Object.entries(afterMembers)
+    .filter(([userId]) => !beforeMembers[userId])
+    .reduce((acc, [userId, afterRole]) => {
+      acc[userId] = afterRole;
+      return acc;
+    }, {} as ProjectMembers);
+
   const removedMemberIDs = Object.keys(beforeMembers).filter(
     id => !afterMemberIDs.includes(id)
   );
+
   const updatedMembers = Object.entries(afterMembers)
     .filter(([userId, afterRole]) => {
       const beforeRole = beforeMembers[userId];
-      return !beforeRole || beforeRole !== afterRole;
+      if (!beforeRole) {
+        return false;
+      }
+      return beforeRole !== afterRole;
     })
     .reduce((acc, [userId, afterRole]) => {
       acc[userId] = afterRole;
       return acc;
     }, {} as ProjectMembers);
-  return { removedMemberIDs, updatedMembers };
+
+  return { addedMembers, removedMemberIDs, updatedMembers };
 };
 
 const membersToUserUpdates = (
@@ -60,6 +73,10 @@ export const getUserUpdateDataFromProjectDiffMembers = (
   projectId: string,
   diffMembers: MembersDiff
 ) => {
+  const addedUserUpdates = membersToUserUpdates(
+    diffMembers.addedMembers,
+    projectId
+  );
   const userUpdates = membersToUserUpdates(
     diffMembers.updatedMembers,
     projectId
@@ -70,7 +87,7 @@ export const getUserUpdateDataFromProjectDiffMembers = (
       data: { ['projects.' + projectId]: admin.firestore.FieldValue.delete() }
     };
   });
-  return [...userUpdates, ...removeUserUpdate];
+  return [...addedUserUpdates, ...userUpdates, ...removeUserUpdate];
 };
 
 export const getUserUpdateDataFromDeletedProject = (project: Project) => {
