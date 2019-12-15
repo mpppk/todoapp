@@ -1,6 +1,6 @@
 import * as firebase from 'firebase';
 import * as admin from 'firebase-admin';
-import { ProjectMembers, Project, ProjectRoles } from '../../../domain/todo';
+import { ProjectMemberRoles, Project, ProjectRole } from '../../../domain/todo';
 import UpdateData = firebase.firestore.UpdateData;
 
 export interface UserUpdate {
@@ -9,14 +9,14 @@ export interface UserUpdate {
 }
 
 export interface MembersDiff {
-  addedMembers: ProjectMembers;
+  addedMembers: ProjectMemberRoles;
   removedMemberIDs: string[];
-  updatedMembers: ProjectMembers;
+  updatedMembers: ProjectMemberRoles;
 }
 
 export const calcDiffMembers = (
-  beforeMembers: ProjectMembers,
-  afterMembers: ProjectMembers
+  beforeMembers: ProjectMemberRoles,
+  afterMembers: ProjectMemberRoles
 ): MembersDiff => {
   const afterMemberIDs = Object.keys(afterMembers);
   const addedMembers = Object.entries(afterMembers)
@@ -24,7 +24,7 @@ export const calcDiffMembers = (
     .reduce((acc, [userId, afterRole]) => {
       acc[userId] = afterRole;
       return acc;
-    }, {} as ProjectMembers);
+    }, {} as ProjectMemberRoles);
 
   const removedMemberIDs = Object.keys(beforeMembers).filter(
     id => !afterMemberIDs.includes(id)
@@ -41,32 +41,32 @@ export const calcDiffMembers = (
     .reduce((acc, [userId, afterRole]) => {
       acc[userId] = afterRole;
       return acc;
-    }, {} as ProjectMembers);
+    }, {} as ProjectMemberRoles);
 
   return { addedMembers, removedMemberIDs, updatedMembers };
 };
 
 const membersToUserUpdates = (
-  members: { [id: string]: ProjectRoles },
+  members: { [id: string]: ProjectRole },
   projectId: string
 ) => Object.entries(members).map(generateEntryToUserUpdateFunc(projectId));
 
 const generateEntryToUserUpdateFunc = (projectId: string) => {
-  return ([userId, role]: [string, ProjectRoles]) => ({
+  return ([userId, role]: [string, ProjectRole]) => ({
     id: userId,
     data: { ['projects.' + projectId]: role }
   });
 };
 
 const generateUserUpdateForDeleteProjectFunc = (projectId: string) => {
-  return ([userId, _]: [string, ProjectRoles]) => ({
+  return ([userId, _]: [string, ProjectRole]) => ({
     id: userId,
     data: { ['projects.' + projectId]: admin.firestore.FieldValue.delete() }
   });
 };
 
 export const getUserUpdateDataFromNewProject = (project: Project) => {
-  return membersToUserUpdates(project.members, project.id);
+  return membersToUserUpdates(project.memberRoles, project.id);
 };
 
 export const getUserUpdateDataFromProjectDiffMembers = (
@@ -91,7 +91,7 @@ export const getUserUpdateDataFromProjectDiffMembers = (
 };
 
 export const getUserUpdateDataFromDeletedProject = (project: Project) => {
-  return Object.entries(project.members).map(
+  return Object.entries(project.memberRoles).map(
     generateUserUpdateForDeleteProjectFunc(project.id)
   );
 };

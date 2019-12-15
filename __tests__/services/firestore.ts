@@ -21,13 +21,13 @@ describe('updateDocuments', () => {
       {
         description: 'test1',
         id: 'project1',
-        members: {},
+        memberRoles: {},
         title: 'test1'
       },
       {
         description: 'test2',
         id: 'project2',
-        members: {},
+        memberRoles: {},
         title: 'test2'
       }
     ];
@@ -36,7 +36,7 @@ describe('updateDocuments', () => {
       {
         description: 'test3',
         id: 'project3',
-        members: {},
+        memberRoles: {},
         title: 'test3'
       }
     ];
@@ -53,7 +53,7 @@ describe('updateDocuments', () => {
       {
         description: 'test1',
         id: 'project1',
-        members: {},
+        memberRoles: {},
         title: 'test1'
       }
     ];
@@ -63,7 +63,7 @@ describe('updateDocuments', () => {
       {
         description: 'test2',
         id: 'project1',
-        members: {},
+        memberRoles: {},
         title: updatedTitle
       }
     ];

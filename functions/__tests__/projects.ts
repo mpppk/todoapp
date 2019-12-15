@@ -1,5 +1,5 @@
 import * as admin from 'firebase-admin';
-import { ProjectMembers } from '../../domain/todo';
+import { ProjectMemberRoles } from '../../domain/todo';
 import {
   calcDiffMembers,
   getUserUpdateDataFromDeletedProject,
@@ -9,11 +9,11 @@ import {
 } from '../src/projects/util';
 
 describe('callDiffMembers', () => {
-  it('return empty diff if members are not changed', async () => {
-    const beforeMembers: ProjectMembers = {
+  it('return empty diff if memberRoles are not changed', async () => {
+    const beforeMembers: ProjectMemberRoles = {
       alice: 'projectReader'
     };
-    const afterMembers: ProjectMembers = {
+    const afterMembers: ProjectMemberRoles = {
       alice: 'projectReader'
     };
 
@@ -27,11 +27,11 @@ describe('callDiffMembers', () => {
   });
 
   it('return diff if member is changed', async () => {
-    const beforeMembers: ProjectMembers = {
+    const beforeMembers: ProjectMemberRoles = {
       alice: 'projectReader',
       bob: 'projectReader'
     };
-    const afterMembers: ProjectMembers = {
+    const afterMembers: ProjectMemberRoles = {
       alice: 'projectOwner',
       carol: 'projectReader'
     };
@@ -47,13 +47,13 @@ describe('callDiffMembers', () => {
 });
 
 describe('getUserUpdateDataFromNewProject', () => {
-  it('return valid user updates', async () => {
+  it('return valid member updates', async () => {
     const project = {
       id: 'p1',
       members: {
         alice: 'projectReader',
         bob: 'projectOwner'
-      } as ProjectMembers,
+      } as ProjectMemberRoles,
       title: 'title',
       description: 'desc'
     };
@@ -68,7 +68,7 @@ describe('getUserUpdateDataFromNewProject', () => {
 });
 
 describe('getUserUpdateDataFromProjectDiffMembers', () => {
-  it('return valid user updates', async () => {
+  it('return valid member updates', async () => {
     const diffMembers: MembersDiff = {
       addedMembers: {
         alice: 'projectOwner'
@@ -96,13 +96,13 @@ describe('getUserUpdateDataFromProjectDiffMembers', () => {
 });
 
 describe('getUserUpdateDataFromDeletedProject', () => {
-  it('return valid user updates', async () => {
+  it('return valid member updates', async () => {
     const project = {
       id: 'p1',
       members: {
         alice: 'projectReader',
         bob: 'projectOwner'
-      } as ProjectMembers,
+      } as ProjectMemberRoles,
       title: 'title',
       description: 'desc'
     };

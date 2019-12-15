@@ -11,7 +11,8 @@ export const fromFirebaseUserToUser = (user: firebase.User): User => {
     id: user.uid,
     isAnonymous: user.isAnonymous,
     phoneNumber: user.phoneNumber,
-    photoURL: user.photoURL ? user.photoURL : undefined
+    photoURL: user.photoURL ? user.photoURL : undefined,
+    projects: {} // TODO: 再ログインすると参加しているプロジェクトが消える?
   };
 };
 
