@@ -25,62 +25,56 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
+export interface ProjectMemberListItemConfig {
+  member: ProjectMember;
+  isLoginUser: boolean;
+  isUpdatingUser: boolean;
+}
+
 export interface ProjectMemberListProps {
-  members: ProjectMember[];
-  updatingUser: User | undefined;
+  memberConfigs: ProjectMemberListItemConfig[];
   onClickEditMemberButton: (user: User) => void;
   onClickRemoveMemberButton: (user: User) => void;
 }
 
-export interface ProjectMemberListItemProps {
+interface ProjectMemberListItemProps {
   member: ProjectMember;
+  disableMoreButton: boolean;
   onClickMoreButton: (
     e: React.MouseEvent<HTMLElement>,
     member: ProjectMember
   ) => void;
-}
-
-export interface UpdatingProjectMemberListItemProps {
-  user: User;
+  updating: boolean;
 }
 
 // tslint:disable-next-line variable-name
 const ProjectMemberListItem = (props: ProjectMemberListItemProps) => {
-  const handleClickMoreButton = (e: React.MouseEvent<HTMLElement>) => {
+  let handleClickMoreButton = (e: React.MouseEvent<HTMLElement>) => {
     props.onClickMoreButton(e, props.member);
   };
+  const disableMoreButton = props.disableMoreButton || props.updating;
+  if (disableMoreButton) {
+    // tslint:disable-next-line
+    handleClickMoreButton = () => {};
+  }
+
   const roleName = toRoleDisplayName(props.member.role);
+  const secondaryText = props.updating ? 'updating...' : roleName;
 
   return (
-    <ListItem alignItems="flex-start" button={true}>
+    <ListItem alignItems="flex-start" button={true} disabled={props.updating}>
       <ListItemAvatar>
         <Avatar alt="Remy Sharp" src={props.member.user.photoURL} />
       </ListItemAvatar>
       <ListItemText
         primary={props.member.user.displayName}
-        secondary={roleName}
+        secondary={secondaryText}
       />
-      <ListItemSecondaryAction onClick={handleClickMoreButton}>
-        <IconButton>
-          <MoreHoriz />
-        </IconButton>
-      </ListItemSecondaryAction>
-    </ListItem>
-  );
-};
-
-// tslint:disable-next-line variable-name
-const UpdatingProjectMemberListItem = (
-  props: UpdatingProjectMemberListItemProps
-) => {
-  return (
-    <ListItem alignItems="flex-start" button={true} disabled={true}>
-      <ListItemAvatar>
-        <Avatar alt="Remy Sharp" src={props.user.photoURL} />
-      </ListItemAvatar>
-      <ListItemText primary={props.user.displayName} secondary="updating..." />
-      <ListItemSecondaryAction>
-        <IconButton>
+      <ListItemSecondaryAction
+        onClick={handleClickMoreButton}
+        aria-disabled={disableMoreButton}
+      >
+        <IconButton disabled={disableMoreButton}>
           <MoreHoriz />
         </IconButton>
       </ListItemSecondaryAction>
@@ -121,21 +115,17 @@ export default (props: ProjectMemberListProps) => {
   return (
     <div>
       <List className={classes.root}>
-        {props.members.map(member => {
+        {props.memberConfigs.map(config => {
           return (
             <ProjectMemberListItem
-              key={'projectMemberListItem_' + member.user.id}
-              member={member}
+              disableMoreButton={!config.isLoginUser}
+              key={'projectMemberListItem_' + config.member.user.id}
+              member={config.member}
               onClickMoreButton={handleClickMoreButton}
+              updating={config.isUpdatingUser}
             />
           );
         })}
-        {props.updatingUser ? (
-          <UpdatingProjectMemberListItem
-            key={'projectMemberListItem_updating_' + props.updatingUser.id}
-            user={props.updatingUser}
-          />
-        ) : null}
       </List>
       <ProjectMemberMenu
         id={`project-member-menu-${currentMember ? currentMember.user.id : ''}`}
