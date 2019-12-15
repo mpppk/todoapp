@@ -1,17 +1,18 @@
 {
   "name": "functions",
   "scripts": {
-    "lint": "tslint --project tsconfig.json",
+    "lint": "tslint --project tsconfig.json -c tslint.json",
     "build": "tsc",
     "watch": "tsc -w",
     "serve": "firebase serve --only functions",
     "shell": "yarn build && firebase functions:shell",
     "start": "yarn shell",
+    "test": "jest",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log"
   },
   "resolutions": {
-    "@types/react": "16.9.14"
+    "@types/react": "16.9.16"
   },
   "main": "lib/functions/src/index.js",
   "dependencies": {
@@ -20,7 +21,10 @@
     "firebase-functions": "3.3.0"
   },
   "devDependencies": {
+    "@types/jest": "^24.0.23",
     "firebase-functions-test": "0.1.7",
+    "jest": "^24.9.0",
+    "ts-jest": "^24.2.0",
     "tslint": "5.20.1",
     "typescript": "3.7.3"
   },
