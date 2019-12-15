@@ -1,4 +1,4 @@
-name: Node CI
+name: CI
 
 on: [push]
 
@@ -40,11 +40,10 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: yarn install, build, and test
-        working-directory: ./functions
         run: |
-          yarn install
-          yarn lint
-          yarn test
-          yarn build
+          yarn --cwd ./functions install
+          yarn --cwd ./functions lint
+          yarn --cwd ./functions test
+          yarn --cwd ./functions build
         env:
           CI: true
