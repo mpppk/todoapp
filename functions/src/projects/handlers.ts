@@ -28,8 +28,8 @@ export const updateProject = projectDoc.onUpdate(async (change, context) => {
   if (!isValidChange(change)) {
     return;
   }
-  const beforeMembers = (change.before.data() as Project).members;
-  const afterMembers = (change.after.data() as Project).members;
+  const beforeMembers = (change.before.data() as Project).memberRoles;
+  const afterMembers = (change.after.data() as Project).memberRoles;
   const projectId = context.params.projectId;
 
   const diffMembers = calcDiffMembers(beforeMembers, afterMembers);

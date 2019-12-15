@@ -64,12 +64,12 @@ export default () => {
   const handleClickCreateProjectButton = (_e: ClickEvent) => {
     if (state.user === null) {
       // tslint:disable-next-line no-console
-      console.warn('project will not be created because user is undefined');
+      console.warn('project will not be created because member is undefined');
       return;
     }
     handlers.clickCreateProjectButton({
       description,
-      members: {
+      memberRoles: {
         [state.user.id]: 'projectOwner'
       },
       title

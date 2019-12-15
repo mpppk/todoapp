@@ -16,7 +16,7 @@ import AddNewMemberToProjectDialog from '../../../components/AddNewMemberToProje
 import MyAppBar from '../../../components/AppBar';
 import ProjectMemberList from '../../../components/ProjectMemberList';
 import { ChangeEvent, EventHandler } from '../../../core/events';
-import { Project } from '../../../domain/todo';
+import { Project, ProjectMember, ProjectRole } from '../../../domain/todo';
 import { User } from '../../../domain/user';
 import { State } from '../../../reducers/reducer';
 import { FieldValue } from '../../../services/session';
@@ -24,11 +24,11 @@ import { FieldValue } from '../../../services/session';
 const useHandlers = () => {
   const dispatch = useDispatch();
   return {
-    addProjectMember: (user: User, projectId: string) => {
+    addProjectMember: (user: User, projectId: string, role: ProjectRole) => {
       dispatch(
         projectCollectionActionCreator.modify.started({
           doc: {
-            [`members.${user.id}`]: 'projectReader'
+            [`members.${user.id}`]: role
           },
           selectorParam: { id: projectId }
         })
@@ -126,12 +126,12 @@ export default () => {
   const handleClickSaveProjectSettingsButton = () => {
     if (state.user === null) {
       // tslint:disable-next-line no-console
-      console.warn('project will not be created because user is undefined');
+      console.warn('project will not be created because member is undefined');
       return;
     }
     if (!state.project) {
       // tslint:disable-next-line no-console
-      console.warn('project will not be created because user is undefined');
+      console.warn('project will not be created because member is undefined');
       return;
     }
     handlers.clickSaveProjectSettingsButton({
@@ -173,9 +173,9 @@ export default () => {
   const handleChangeDescriptionInput: EventHandler<ChangeEvent> = e =>
     setDescription(e.target.value);
 
-  const handleClickAddButton = (user: User) => {
+  const handleClickAddButton = (user: User, role: ProjectRole) => {
     setUpdatingMember(user);
-    handlers.addProjectMember(user, state.project!.id);
+    handlers.addProjectMember(user, state.project!.id, role);
     handleClose();
   };
 
@@ -195,6 +195,13 @@ export default () => {
   let projectUsers = state.projectUsers;
   if (updatingMember) {
     projectUsers = projectUsers.filter(u => u.id !== updatingMember.id);
+  }
+  let members: ProjectMember[] = [];
+  if (state.project !== undefined) {
+    members = projectUsers.map(user => ({
+      role: user.projects[state.project!.id],
+      user
+    }));
   }
 
   return (
@@ -230,7 +237,7 @@ export default () => {
         <Grid item={true}>
           <Typography variant={'h4'}>Members</Typography>
           <ProjectMemberList
-            users={projectUsers}
+            members={members}
             updatingUser={updatingMember ? updatingMember : undefined}
             onClickEditMemberButton={handleClickEditMemberButton}
             onClickRemoveMemberButton={handleClickRemoveMemberButton}

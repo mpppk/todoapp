@@ -1,3 +1,5 @@
+import { User } from './user';
+
 export type Task = TaskID & TaskDraft;
 
 export const toDraft = (task: Task): TaskDraft => {
@@ -20,14 +22,33 @@ export interface TaskDraft {
 
 export type ProjectID = ID;
 export type Project = ProjectID & ProjectDraft;
-export type ProjectRoles = 'projectOwner' | 'projectWriter' | 'projectReader';
+export type ProjectRole = 'projectOwner' | 'projectWriter' | 'projectReader';
 
-export interface ProjectMembers {
-  [key: string]: ProjectRoles;
+export const toRoleDisplayName = (role: ProjectRole) => {
+  switch (role) {
+    case 'projectReader':
+      return 'Reader';
+    case 'projectWriter':
+      return 'Writer';
+    case 'projectOwner':
+      return 'Owner';
+    default:
+      const _: never = role;
+      return _;
+  }
+};
+
+export interface ProjectMember {
+  user: User;
+  role: ProjectRole;
+}
+
+export interface ProjectMemberRoles {
+  [userId: string]: ProjectRole;
 }
 
 export interface ProjectDraft {
   title: string;
   description: string;
-  members: ProjectMembers;
+  memberRoles: ProjectMemberRoles;
 }
