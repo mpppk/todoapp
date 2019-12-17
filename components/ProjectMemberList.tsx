@@ -35,12 +35,14 @@ export interface ProjectMemberListProps {
   loginMember?: ProjectMember;
   memberConfigs: ProjectMemberListItemConfig[];
   onClickEditMemberButton: (user: User) => void;
+  onClickMember: (member: ProjectMember) => void;
   onClickRemoveMemberButton: (user: User) => void;
 }
 
 interface ProjectMemberListItemProps {
   member: ProjectMember;
   disableMoreButton: boolean;
+  onClickMember: (member: ProjectMember) => void;
   onClickMoreButton: (
     e: React.MouseEvent<HTMLElement>,
     member: ProjectMember
@@ -62,8 +64,17 @@ const ProjectMemberListItem = (props: ProjectMemberListItemProps) => {
   const roleName = toRoleDisplayName(props.member.role);
   const secondaryText = props.updating ? 'updating...' : roleName;
 
+  const handleClickMember = () => {
+    props.onClickMember(props.member);
+  };
+
   return (
-    <ListItem alignItems="flex-start" button={true} disabled={props.updating}>
+    <ListItem
+      alignItems="flex-start"
+      button={true}
+      onClick={handleClickMember}
+      disabled={props.updating}
+    >
       <ListItemAvatar>
         <Avatar alt="Remy Sharp" src={props.member.user.photoURL} />
       </ListItemAvatar>
@@ -129,6 +140,7 @@ export default (props: ProjectMemberListProps) => {
               disableMoreButton={config.disableMoreButton}
               key={'projectMemberListItem_' + config.member.user.id}
               member={config.member}
+              onClickMember={props.onClickMember}
               onClickMoreButton={handleClickMoreButton}
               updating={config.isUpdatingUser}
             />
