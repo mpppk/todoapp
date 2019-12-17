@@ -8,7 +8,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import MoreHoriz from '@material-ui/icons/MoreHorizOutlined';
 import React, { useState } from 'react';
-import { ProjectMember, toRoleDisplayName } from '../domain/todo';
+import { ProjectMember, ProjectRole, toRoleDisplayName } from '../domain/todo';
 import { User } from '../domain/user';
 import { ProjectMemberMenu } from './ProjectMemberMenu';
 
@@ -32,6 +32,7 @@ export interface ProjectMemberListItemConfig {
 }
 
 export interface ProjectMemberListProps {
+  loginMember?: ProjectMember;
   memberConfigs: ProjectMemberListItemConfig[];
   onClickEditMemberButton: (user: User) => void;
   onClickRemoveMemberButton: (user: User) => void;
@@ -112,6 +113,13 @@ export default (props: ProjectMemberListProps) => {
     setNullAnchorEl();
   };
 
+  const canChangeRole = (cMember?: ProjectMember): boolean => {
+    if (!props.loginMember || !cMember) {
+      return false;
+    }
+    return props.loginMember.role === ('projectOwner' as ProjectRole);
+  };
+
   return (
     <div>
       <List className={classes.root}>
@@ -128,7 +136,13 @@ export default (props: ProjectMemberListProps) => {
         })}
       </List>
       <ProjectMemberMenu
+        canChangeRole={canChangeRole(currentMember)}
         id={`project-member-menu-${currentMember ? currentMember.user.id : ''}`}
+        isLoginUser={
+          !!currentMember &&
+          !!props.loginMember &&
+          currentMember.user.id === props.loginMember.user.id
+        }
         anchorEl={anchorEl}
         onClose={setNullAnchorEl}
         onClickDelete={handleClickRemoveMemberButton}

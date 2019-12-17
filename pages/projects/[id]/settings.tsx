@@ -240,6 +240,14 @@ const generateViewState = (
   }
 
   const loginUser = globalState.user;
+  let loginMember = undefined as ProjectMember | undefined;
+  if (loginUser && globalState.project) {
+    loginMember = {
+      role: loginUser.projects[globalState.project.id],
+      user: loginUser
+    };
+  }
+
   const isOwner = (project: Project, user: User) => {
     if (!user.projects) {
       return false;
@@ -264,7 +272,7 @@ const generateViewState = (
     member
   }));
 
-  return { memberConfigs };
+  return { memberConfigs, loginMember };
 };
 
 export default () => {
@@ -319,6 +327,7 @@ export default () => {
         <Grid item={true}>
           <Typography variant={'h4'}>Members</Typography>
           <ProjectMemberList
+            loginMember={viewState.loginMember}
             memberConfigs={viewState.memberConfigs}
             onClickEditMemberButton={componentHandlers.clickEditMemberButton}
             onClickRemoveMemberButton={

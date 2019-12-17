@@ -3,7 +3,9 @@ import MenuItem from '@material-ui/core/MenuItem';
 import * as React from 'react';
 
 interface ProjectMemberMenuProps {
+  canChangeRole: boolean;
   id: string;
+  isLoginUser: boolean;
   anchorEl: null | HTMLElement;
   onClickEdit: () => void;
   onClickDelete: () => void;
@@ -20,8 +22,12 @@ export const ProjectMemberMenu: React.FunctionComponent<ProjectMemberMenuProps> 
       open={Boolean(props.anchorEl)}
       onClose={props.onClose}
     >
-      <MenuItem onClick={props.onClickEdit}>Change role</MenuItem>
-      <MenuItem onClick={props.onClickDelete}>Remove</MenuItem>
+      {props.canChangeRole ? (
+        <MenuItem onClick={props.onClickEdit}>Change role</MenuItem>
+      ) : null}
+      <MenuItem onClick={props.onClickDelete}>
+        {props.isLoginUser ? 'Leave' : 'Remove'}
+      </MenuItem>
     </Menu>
   );
 };
