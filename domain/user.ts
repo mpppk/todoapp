@@ -5,11 +5,7 @@ export interface JoinedProjects {
 }
 export interface User {
   displayName?: string;
-  email?: string;
-  emailVerified: boolean;
   projects: JoinedProjects;
   photoURL?: string;
-  isAnonymous: boolean;
-  phoneNumber: string | null;
   id: string;
 }

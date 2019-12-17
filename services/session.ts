@@ -1,20 +1,6 @@
 import firebase from 'firebase';
 import getConfig from 'next/config';
-import { User } from '../domain/user';
 const { publicRuntimeConfig } = getConfig();
-
-export const fromFirebaseUserToUser = (user: firebase.User): User => {
-  return {
-    displayName: user.displayName ? user.displayName : undefined,
-    email: user.email ? user.email : undefined,
-    emailVerified: user.emailVerified,
-    id: user.uid,
-    isAnonymous: user.isAnonymous,
-    phoneNumber: user.phoneNumber,
-    photoURL: user.photoURL ? user.photoURL : undefined,
-    projects: {} // TODO: 再ログインすると参加しているプロジェクトが消える?
-  };
-};
 
 export const initializeFirebase = () => {
   // Configure Firebase.

@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export interface ProjectMemberListItemConfig {
   member: ProjectMember;
-  isLoginUser: boolean;
+  disableMoreButton: boolean;
   isUpdatingUser: boolean;
 }
 
@@ -118,7 +118,7 @@ export default (props: ProjectMemberListProps) => {
         {props.memberConfigs.map(config => {
           return (
             <ProjectMemberListItem
-              disableMoreButton={!config.isLoginUser}
+              disableMoreButton={config.disableMoreButton}
               key={'projectMemberListItem_' + config.member.user.id}
               member={config.member}
               onClickMoreButton={handleClickMoreButton}

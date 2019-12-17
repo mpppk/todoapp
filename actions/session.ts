@@ -1,3 +1,4 @@
+import firebase from 'firebase';
 import actionCreatorFactory from 'typescript-fsa';
 import { User } from '../domain/user';
 
@@ -11,6 +12,7 @@ export const sessionActionCreators = {
   finishFirebaseInitializing: sessionActionCreatorFactory(
     'FINISH_FIREBASE_INITIALIZING'
   ),
+  login: sessionActionCreatorFactory<firebase.User>('LOGIN'),
   requestToInitializeFirebase: sessionActionCreatorFactory(
     'REQUEST_TO_INITIALIZE_FIREBASE'
   ),

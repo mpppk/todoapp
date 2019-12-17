@@ -33,6 +33,7 @@ export interface CollectionActionCreator<Doc extends DocBase> {
   removed: ActionCreator<SnapshotEventPayload<Doc>>;
   subscribe: AsyncActionCreators<SubscribeActionPayload, undefined>;
   unsubscribe: AsyncActionCreators<SubscribeActionPayload, undefined>;
+  get: AsyncActionCreators<DocParam<string>, Doc>;
 }
 
 export interface CollectionQueryActionCreators<Result = any> {
@@ -77,6 +78,7 @@ export const firebaseActionCreatorFactory = (prefix: string) => {
           add,
           added: factory<SnapshotEventPayload<Doc>>(`${eventPrefix}_ADDED`),
           collectionPath,
+          get: factory.async<DocParam<string>, Doc>(`${eventPrefix}_GET`),
           modified: factory<SnapshotEventPayload<Doc>>(
             `${eventPrefix}_MODIFIED`
           ),

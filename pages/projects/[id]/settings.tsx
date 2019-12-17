@@ -240,9 +240,26 @@ const generateViewState = (
   }
 
   const loginUser = globalState.user;
+  const isOwner = (project: Project, user: User) => {
+    if (!user.projects) {
+      return false;
+    }
+    return user.projects[project.id] === ('projectOwner' as ProjectRole);
+  };
+
+  const shouldDisableMoreButton = (member: ProjectMember) => {
+    if (!globalState.project || !loginUser) {
+      return true;
+    }
+    if (isOwner(globalState.project, loginUser)) {
+      return false;
+    }
+    return member.user.id !== loginUser!.id;
+  };
+
   const updatingUser = componentState.updatingMember;
   const memberConfigs: ProjectMemberListItemConfig[] = members.map(member => ({
-    isLoginUser: !!loginUser && member.user.id === loginUser.id,
+    disableMoreButton: shouldDisableMoreButton(member),
     isUpdatingUser: !!updatingUser && member.user.id === updatingUser.id,
     member
   }));
