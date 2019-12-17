@@ -166,12 +166,15 @@ export const bindFireStoreCollection = <Doc extends DocBase>(
       yield cancel(subscription[0]);
     }
 
-    const subscribeWorker2 = bindAsyncAction(actionCreators.subscribe, {
-      skipStartedAction: true
-    })(subscribeWorker);
-    const unsubscribeWorker2 = bindAsyncAction(actionCreators.unsubscribe, {
-      skipStartedAction: true
-    })(unsubscribeWorker);
+    const opt2 = { skipStartedAction: true };
+    const subscribeWorker2 = bindAsyncAction(
+      actionCreators.subscribe,
+      opt2
+    )(subscribeWorker);
+    const unsubscribeWorker2 = bindAsyncAction(
+      actionCreators.unsubscribe,
+      opt2
+    )(unsubscribeWorker);
 
     yield all([
       (function*() {
@@ -218,6 +221,14 @@ export const bindFireStoreCollection = <Doc extends DocBase>(
       const context = { ...param.doc, ...param.selectorParam };
       const collection = collectionSelector(getFirestore(), context); // FIXME
       return yield call(collection.add.bind(collection), param.doc);
+    }),
+    get: bindAsyncAction(
+      actionCreators.get,
+      opt
+    )(function*(param) {
+      const context = { id: param.doc, ...param.selectorParam };
+      const collection = collectionSelector(getFirestore(), context); // FIXME
+      return yield call(collection.doc(context.id).get.bind(collection));
     }),
     modify: bindAsyncAction(
       actionCreators.modify,

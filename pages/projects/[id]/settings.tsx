@@ -3,7 +3,7 @@ import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import TextField from '@material-ui/core/TextField';
-import { useRouter } from 'next/router';
+import { NextRouter, useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { sessionActionCreators } from '../../../actions/session';
@@ -14,14 +14,20 @@ import {
 import { userCollectionActionCreator } from '../../../actions/user';
 import AddNewMemberToProjectDialog from '../../../components/AddNewMemberToProjectDialog';
 import MyAppBar from '../../../components/AppBar';
-import ProjectMemberList from '../../../components/ProjectMemberList';
-import { ChangeEvent, EventHandler } from '../../../core/events';
+import ProjectMemberList, {
+  ProjectMemberListItemConfig
+} from '../../../components/ProjectMemberList';
+import { ChangeEvent } from '../../../core/events';
 import { Project, ProjectMember, ProjectRole } from '../../../domain/todo';
 import { User } from '../../../domain/user';
 import { State } from '../../../reducers/reducer';
 import { FieldValue } from '../../../services/session';
 
-const useHandlers = () => {
+type GlobalState = ReturnType<typeof useReduxState>;
+type ComponentState = ReturnType<typeof useComponentState>;
+type GlobalHandlers = ReturnType<typeof useGlobalHandlers>;
+
+const useGlobalHandlers = () => {
   const dispatch = useDispatch();
   return {
     addProjectMember: (user: User, projectId: string, role: ProjectRole) => {
@@ -92,6 +98,53 @@ const useReduxState = () => {
   });
 };
 
+const useComponentState = (state: GlobalState) => {
+  const [open, setOpen] = React.useState(false);
+  const [updatingMember, setUpdatingMember] = useState(null as User | null);
+  const [title, setTitle] = useState(state.project ? state.project.title : '');
+  const [description, setDescription] = useState(
+    state.project ? state.project.description : ''
+  );
+  return {
+    open,
+    setOpen,
+    updatingMember,
+    // tslint:disable-next-line:object-literal-sort-keys
+    setUpdatingMember,
+    title,
+    setTitle,
+    description,
+    setDescription
+  };
+};
+
+const usePageEffect = (
+  state: GlobalState,
+  localState: ComponentState,
+  handlers: GlobalHandlers
+) => {
+  useEffect(handlers.requestToInitializeFirebase, []);
+  useEffect(() => {
+    if (state.isReadyFirebase && state.user) {
+      handlers.subscribeProject();
+    }
+  }, [state.isReadyFirebase, state.user]);
+
+  useEffect(() => {
+    if (state.isReadyFirebase && state.project) {
+      localState.setTitle(state.project.title);
+      localState.setDescription(state.project.description);
+      handlers.subscribeProjectUser(state.project.id);
+    }
+  }, [state.isReadyFirebase, state.project]);
+
+  useEffect(() => {
+    if (localState.updatingMember) {
+      localState.setUpdatingMember(null);
+    }
+  }, [state.projectUsers]);
+};
+
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     control: {
@@ -108,105 +161,142 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-export default () => {
-  const classes = useStyles();
-  const handlers = useHandlers();
-  const state = useReduxState();
-  const router = useRouter();
-  const [open, setOpen] = React.useState(false);
+const generateComponentHandlers = (
+  router: NextRouter,
+  globalState: GlobalState,
+  componentState: ComponentState,
+  handlers: GlobalHandlers
+) => {
+  const close = () => componentState.setOpen(false);
+  return {
+    changeDescriptionInput: (e: ChangeEvent) => {
+      componentState.setDescription(e.target.value);
+    },
 
-  const handleClickOpen = () => {
-    setOpen(true);
+    changeTitleInput: (e: ChangeEvent) => {
+      componentState.setTitle(e.target.value);
+    },
+
+    clickOpen: () => {
+      componentState.setOpen(true);
+    },
+
+    clickSaveProjectSettingsButton: () => {
+      if (globalState.user === null) {
+        // tslint:disable-next-line no-console
+        console.warn('project will not be created because member is undefined');
+        return;
+      }
+      if (!globalState.project) {
+        // tslint:disable-next-line no-console
+        console.warn('project will not be created because member is undefined');
+        return;
+      }
+      handlers.clickSaveProjectSettingsButton({
+        ...globalState.project,
+        description: componentState.description,
+        title: componentState.title
+      });
+      router.push('/projects/[id]', `/projects/${globalState.project.id}`);
+    },
+
+    clickAddButton: (user: User, role: ProjectRole) => {
+      componentState.setUpdatingMember(user);
+      handlers.addProjectMember(user, globalState.project!.id, role);
+      close();
+    },
+
+    clickEditMemberButton: (user: User) => {
+      if (globalState.project) {
+        handlers.updateMember(globalState.project.id, user);
+      }
+    },
+    clickRemoveMemberButton: (user: User) => {
+      if (globalState.project) {
+        componentState.setUpdatingMember(user);
+        handlers.removeMember(globalState.project.id, user);
+      }
+    },
+    close
   };
+};
 
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const handleClickSaveProjectSettingsButton = () => {
-    if (state.user === null) {
-      // tslint:disable-next-line no-console
-      console.warn('project will not be created because member is undefined');
-      return;
-    }
-    if (!state.project) {
-      // tslint:disable-next-line no-console
-      console.warn('project will not be created because member is undefined');
-      return;
-    }
-    handlers.clickSaveProjectSettingsButton({
-      ...state.project,
-      description,
-      title
-    });
-    router.push('/projects/[id]', `/projects/${state.project.id}`);
-  };
-
-  useEffect(handlers.requestToInitializeFirebase, []);
-  useEffect(() => {
-    if (state.isReadyFirebase && state.user) {
-      handlers.subscribeProject();
-    }
-  }, [state.isReadyFirebase, state.user]);
-
-  const [updatingMember, setUpdatingMember] = useState(null as User | null);
-  const [title, setTitle] = useState(state.project ? state.project.title : '');
-  const [description, setDescription] = useState(
-    state.project ? state.project.description : ''
-  );
-  useEffect(() => {
-    if (state.isReadyFirebase && state.project) {
-      setTitle(state.project.title);
-      setDescription(state.project.description);
-      handlers.subscribeProjectUser(state.project.id);
-    }
-  }, [state.isReadyFirebase, state.project]);
-
-  useEffect(() => {
-    if (updatingMember) {
-      setUpdatingMember(null);
-    }
-  }, [state.projectUsers]);
-
-  const handleChangeTitleInput: EventHandler<ChangeEvent> = e =>
-    setTitle(e.target.value);
-  const handleChangeDescriptionInput: EventHandler<ChangeEvent> = e =>
-    setDescription(e.target.value);
-
-  const handleClickAddButton = (user: User, role: ProjectRole) => {
-    setUpdatingMember(user);
-    handlers.addProjectMember(user, state.project!.id, role);
-    handleClose();
-  };
-
-  const handleClickEditMemberButton = (user: User) => {
-    if (state.project) {
-      handlers.updateMember(state.project.id, user);
-    }
-  };
-
-  const handleClickRemoveMemberButton = (user: User) => {
-    if (state.project) {
-      setUpdatingMember(user);
-      handlers.removeMember(state.project.id, user);
-    }
-  };
-
-  let projectUsers = state.projectUsers;
-  if (updatingMember) {
-    projectUsers = projectUsers.filter(u => u.id !== updatingMember.id);
+const generateViewState = (
+  globalState: GlobalState,
+  componentState: ComponentState
+) => {
+  let projectUsers = globalState.projectUsers;
+  if (componentState.updatingMember) {
+    projectUsers = projectUsers.filter(
+      u => u.id !== componentState.updatingMember!.id
+    );
   }
   let members: ProjectMember[] = [];
-  if (state.project !== undefined) {
+  if (globalState.project !== undefined) {
     members = projectUsers.map(user => ({
-      role: user.projects[state.project!.id],
+      role: user.projects[globalState.project!.id],
       user
     }));
   }
 
+  const loginUser = globalState.user;
+  let loginMember = undefined as ProjectMember | undefined;
+  if (loginUser && globalState.project) {
+    loginMember = {
+      role: loginUser.projects[globalState.project.id],
+      user: loginUser
+    };
+  }
+
+  const isOwner = (project: Project, user: User) => {
+    if (!user.projects) {
+      return false;
+    }
+    return user.projects[project.id] === ('projectOwner' as ProjectRole);
+  };
+
+  const shouldDisableMoreButton = (member: ProjectMember) => {
+    if (!globalState.project || !loginUser) {
+      return true;
+    }
+    if (isOwner(globalState.project, loginUser)) {
+      return false;
+    }
+    return member.user.id !== loginUser!.id;
+  };
+
+  const updatingUser = componentState.updatingMember;
+  const memberConfigs: ProjectMemberListItemConfig[] = members.map(member => ({
+    disableMoreButton: shouldDisableMoreButton(member),
+    isUpdatingUser: !!updatingUser && member.user.id === updatingUser.id,
+    member
+  }));
+
+  return { memberConfigs, loginMember };
+};
+
+export default () => {
+  const classes = useStyles();
+  const handlers = useGlobalHandlers();
+  const globalState = useReduxState();
+  const componentState = useComponentState(globalState);
+  const router = useRouter();
+  usePageEffect(globalState, componentState, handlers);
+
+  const componentHandlers = generateComponentHandlers(
+    router,
+    globalState,
+    componentState,
+    handlers
+  );
+  const viewState = generateViewState(globalState, componentState);
+
   return (
     <div>
-      <MyAppBar user={state.user} onClickLogout={handlers.requestToLogout} />
+      <MyAppBar
+        user={globalState.user}
+        onClickLogout={handlers.requestToLogout}
+      />
       <Grid
         container={true}
         spacing={2}
@@ -218,56 +308,58 @@ export default () => {
         </Grid>
         <Grid item={true}>
           <TextField
-            disabled={!state.project}
+            disabled={!globalState.project}
             label="Project Name"
             variant="outlined"
-            value={title}
-            onChange={handleChangeTitleInput}
+            value={componentState.title}
+            onChange={componentHandlers.changeTitleInput}
           />
         </Grid>
         <Grid item={true}>
           <TextField
-            disabled={!state.project}
+            disabled={!globalState.project}
             label="Description"
             variant="outlined"
-            value={description}
-            onChange={handleChangeDescriptionInput}
+            value={componentState.description}
+            onChange={componentHandlers.changeDescriptionInput}
           />
         </Grid>
         <Grid item={true}>
           <Typography variant={'h4'}>Members</Typography>
           <ProjectMemberList
-            members={members}
-            updatingUser={updatingMember ? updatingMember : undefined}
-            onClickEditMemberButton={handleClickEditMemberButton}
-            onClickRemoveMemberButton={handleClickRemoveMemberButton}
+            loginMember={viewState.loginMember}
+            memberConfigs={viewState.memberConfigs}
+            onClickEditMemberButton={componentHandlers.clickEditMemberButton}
+            onClickRemoveMemberButton={
+              componentHandlers.clickRemoveMemberButton
+            }
           />
           <Button
-            disabled={!!updatingMember}
+            disabled={!!componentState.updatingMember}
             variant={'outlined'}
             color={'secondary'}
-            onClick={handleClickOpen}
+            onClick={componentHandlers.clickOpen}
           >
             Add new member
           </Button>
         </Grid>
         <Grid item={true}>
           <Button
-            disabled={!state.project || !!updatingMember}
+            disabled={!globalState.project || !!componentState.updatingMember}
             variant={'outlined'}
             color={'primary'}
-            onClick={handleClickSaveProjectSettingsButton}
+            onClick={componentHandlers.clickSaveProjectSettingsButton}
           >
             Save
           </Button>
         </Grid>
       </Grid>
       <AddNewMemberToProjectDialog
-        open={open}
+        open={componentState.open}
         onChangeUserNameInput={handlers.changeUserNameInput}
-        onClose={handleClose}
-        users={state.candidateUsers} // FIXME
-        onClickAddButton={handleClickAddButton}
+        onClose={componentHandlers.close}
+        users={globalState.candidateUsers} // FIXME
+        onClickAddButton={componentHandlers.clickAddButton}
       />
     </div>
   );
