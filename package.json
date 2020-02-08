@@ -46,7 +46,7 @@
   "devDependencies": {
     "@firebase/testing": "0.16.8",
     "@google-cloud/functions-framework": "1.4.0",
-    "@types/enzyme": "3.10.4",
+    "@types/enzyme": "3.10.5",
     "@types/jest": "24.9.1",
     "@types/lodash": "4.14.149",
     "@types/react": "16.9.19",
