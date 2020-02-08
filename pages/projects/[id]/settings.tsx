@@ -211,6 +211,10 @@ const generateComponentHandlers = (
         handlers.updateMember(globalState.project.id, user);
       }
     },
+    clickProjectMemberInList: (member: ProjectMember) => {
+      const userId = member.user.id;
+      router.push('/users/[id]', '/users/' + userId);
+    },
     clickRemoveMemberButton: (user: User) => {
       if (globalState.project) {
         componentState.setUpdatingMember(user);
@@ -330,6 +334,7 @@ export default () => {
             loginMember={viewState.loginMember}
             memberConfigs={viewState.memberConfigs}
             onClickEditMemberButton={componentHandlers.clickEditMemberButton}
+            onClickMember={componentHandlers.clickProjectMemberInList}
             onClickRemoveMemberButton={
               componentHandlers.clickRemoveMemberButton
             }
