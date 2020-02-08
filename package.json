@@ -44,7 +44,7 @@
     "typescript-fsa-redux-saga": "2.0.0"
   },
   "devDependencies": {
-    "@firebase/testing": "0.16.7",
+    "@firebase/testing": "0.16.8",
     "@google-cloud/functions-framework": "1.4.0",
     "@types/enzyme": "3.10.4",
     "@types/jest": "24.9.1",
