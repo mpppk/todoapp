@@ -1733,6 +1733,11 @@
     jest-diff "^25.1.0"
     pretty-format "^25.1.0"
 
+"@types/js-yaml@^3.12.2":
+  version "3.12.2"
+  resolved "https://registry.yarnpkg.com/@types/js-yaml/-/js-yaml-3.12.2.tgz#a35a1809c33a68200fb6403d1ad708363c56470a"
+  integrity sha512-0CFu/g4mDSNkodVwWijdlr8jH7RoplRWNgovjFLEZeT+QEbbZXjBmCe3HwaWheAlCbHwomTwzZoSedeOycABug==
+
 "@types/lodash@4.14.149":
   version "4.14.149"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.149.tgz#1342d63d948c6062838fbf961012f74d4e638440"
@@ -4641,12 +4646,13 @@ find-versions@^3.2.0:
   dependencies:
     semver-regex "^2.0.0"
 
-firebase-tools@7.14.0:
-  version "7.14.0"
-  resolved "https://registry.yarnpkg.com/firebase-tools/-/firebase-tools-7.14.0.tgz#947a496b62fd75cbe842d8112631c3c1d61a4c63"
-  integrity sha512-bASBsY28tbdqLIAM92PirxLZWE0i5CgiLNrOkiKxz0vdQbOrGJEUcgOQGQe4xM9AaqbPw87FoTT0xJWrEUJKWw==
+firebase-tools@7.15.0:
+  version "7.15.0"
+  resolved "https://registry.yarnpkg.com/firebase-tools/-/firebase-tools-7.15.0.tgz#e1ffe03aef934e9dbbec6acaeaccad11fece282f"
+  integrity sha512-NQ9mkcDKy0dAbD5LRPNGqoYEPR3wUGhm92OZTnS9bimhBiruPnkbwSq4PvjfGVyM7FyzyqvTawGlcj2gzD7QLw==
   dependencies:
     "@google-cloud/pubsub" "^1.1.5"
+    "@types/js-yaml" "^3.12.2"
     JSONStream "^1.2.1"
     archiver "^3.0.0"
     body-parser "^1.19.0"
@@ -4669,6 +4675,7 @@ firebase-tools@7.14.0:
     google-auto-auth "^0.10.1"
     google-gax "~1.12.0"
     inquirer "~6.3.1"
+    js-yaml "^3.13.1"
     jsonschema "^1.0.2"
     jsonwebtoken "^8.2.1"
     lodash "^4.17.14"
@@ -4688,7 +4695,7 @@ firebase-tools@7.14.0:
     tcp-port-used "^1.0.1"
     tmp "0.0.33"
     universal-analytics "^0.4.16"
-    unzipper "^0.10.5"
+    unzipper "^0.10.10"
     update-notifier "^2.5.0"
     uuid "^3.0.0"
     winston "^1.0.1"
@@ -10332,9 +10339,10 @@ unzip-response@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/unzip-response/-/unzip-response-2.0.1.tgz#d2f0f737d16b0615e72a6935ed04214572d56f97"
 
-unzipper@^0.10.5:
-  version "0.10.5"
-  resolved "https://registry.yarnpkg.com/unzipper/-/unzipper-0.10.5.tgz#4d189ae6f8af634b26efe1a1817c399e0dd4a1a0"
+unzipper@^0.10.10:
+  version "0.10.10"
+  resolved "https://registry.yarnpkg.com/unzipper/-/unzipper-0.10.10.tgz#d82d41fbdfa1f0731123eb11c2cfc028b45d3d42"
+  integrity sha512-wEgtqtrnJ/9zIBsQb8UIxOhAH1eTHfi7D/xvmrUoMEePeI6u24nq1wigazbIFtHt6ANYXdEVTvc8XYNlTurs7A==
   dependencies:
     big-integer "^1.6.17"
     binary "~0.3.0"
