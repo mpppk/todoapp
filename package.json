@@ -47,7 +47,7 @@
     "@firebase/testing": "0.18.2",
     "@google-cloud/functions-framework": "1.5.0",
     "@types/enzyme": "3.10.5",
-    "@types/jest": "25.1.5",
+    "@types/jest": "25.2.1",
     "@types/lodash": "4.14.149",
     "@types/react": "16.9.32",
     "@types/react-dom": "16.9.6",
