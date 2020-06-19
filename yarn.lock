@@ -1371,20 +1371,6 @@
   resolved "https://registry.yarnpkg.com/@firebase/firestore-types/-/firestore-types-1.11.0.tgz#ccb734fd424b8b6c3aff3ad1921a89ee31be229b"
   integrity sha512-hD7+cmMUvT5OJeWVrcRkE87PPuj/0/Wic6bntCopJE1WIX/Dm117AUkHgKd3S7Ici6DLp4bdlx1MjjwWL5942w==
 
-"@firebase/firestore@1.15.2":
-  version "1.15.2"
-  resolved "https://registry.yarnpkg.com/@firebase/firestore/-/firestore-1.15.2.tgz#c0686a19a3ba60a608245ee108d5ed661bd7c8e4"
-  integrity sha512-JIXmrQjTFWRK91gY+6IK8wLNdAt59jBlxM9aa+rxwxZfK2tu19Gy2WBbMVrXv4DXHdlYVGODwE9Qan55B3nu3Q==
-  dependencies:
-    "@firebase/component" "0.1.14"
-    "@firebase/firestore-types" "1.11.0"
-    "@firebase/logger" "0.2.5"
-    "@firebase/util" "0.2.49"
-    "@firebase/webchannel-wrapper" "0.2.41"
-    "@grpc/grpc-js" "^1.0.0"
-    "@grpc/proto-loader" "^0.5.0"
-    tslib "^1.11.1"
-
 "@firebase/firestore@1.15.3":
   version "1.15.3"
   resolved "https://registry.yarnpkg.com/@firebase/firestore/-/firestore-1.15.3.tgz#34446efceb9a10b0974342337bc7aa2e273ecc78"
@@ -5226,26 +5212,6 @@ firebase-tools@8.4.3:
     uuid "^3.0.0"
     winston "^3.0.0"
     ws "^7.2.3"
-
-firebase@7.15.2:
-  version "7.15.2"
-  resolved "https://registry.yarnpkg.com/firebase/-/firebase-7.15.2.tgz#6d51d05fe1124253b2b466a8a61f303f82cbef47"
-  integrity sha512-JZ5GzIIQdh3BUmYr6A8ZYlYnhorFhKim5rDnz3F4ttakoYHFlD3gRVvxwJkEmemnbK2Cy+MZKImabObEuKrdrA==
-  dependencies:
-    "@firebase/analytics" "0.3.7"
-    "@firebase/app" "0.6.6"
-    "@firebase/app-types" "0.6.1"
-    "@firebase/auth" "0.14.7"
-    "@firebase/database" "0.6.5"
-    "@firebase/firestore" "1.15.2"
-    "@firebase/functions" "0.4.46"
-    "@firebase/installations" "0.4.12"
-    "@firebase/messaging" "0.6.18"
-    "@firebase/performance" "0.3.7"
-    "@firebase/polyfill" "0.3.36"
-    "@firebase/remote-config" "0.1.23"
-    "@firebase/storage" "0.3.36"
-    "@firebase/util" "0.2.49"
 
 firebase@7.15.3:
   version "7.15.3"
