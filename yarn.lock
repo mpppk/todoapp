@@ -1298,6 +1298,18 @@
     "@firebase/util" "0.2.50"
     tslib "^1.11.1"
 
+"@firebase/analytics@0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@firebase/analytics/-/analytics-0.4.0.tgz#15dfee56619af18c262d4b7cb2f1d4e7c25194de"
+  integrity sha512-8DC2OBXGYxeeRxCh6eFnrrswNcKm2WsD8EeqGcl0F1P7J0bJ4Q+WpP3DvxofQZ/PtVHdAhzmfmt9r6Xa9mHnrQ==
+  dependencies:
+    "@firebase/analytics-types" "0.3.1"
+    "@firebase/component" "0.1.16"
+    "@firebase/installations" "0.4.14"
+    "@firebase/logger" "0.2.6"
+    "@firebase/util" "0.2.50"
+    tslib "^1.11.1"
+
 "@firebase/app-types@0.6.1":
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/@firebase/app-types/-/app-types-0.6.1.tgz#dcbd23030a71c0c74fc95d4a3f75ba81653850e9"
@@ -1492,14 +1504,24 @@
     "@firebase/util" "0.2.50"
     tslib "^1.11.1"
 
-"@firebase/testing@0.20.7":
-  version "0.20.7"
-  resolved "https://registry.yarnpkg.com/@firebase/testing/-/testing-0.20.7.tgz#cfe6a2ad270e18cf7bb89338c45cf9b21e91fea7"
-  integrity sha512-x08O3ac7kZczdi2uEya/UPk2+parnauel8rBhPD3HTfl/mS7n94H4x6SYzZFfNdqETfvRamPEVm6jbx1B1wNkA==
+"@firebase/storage@0.3.40":
+  version "0.3.40"
+  resolved "https://registry.yarnpkg.com/@firebase/storage/-/storage-0.3.40.tgz#4e6ea66d9c3ce489cd1a892940c57c3078853410"
+  integrity sha512-xTUvSSXh8tNSlch4V+kNbw736H0z/lbW3rHlx1kZVnT8V5M4bXE+TEcG4WpqvcWH3p+N6N1bUorkDbOFgBrztw==
+  dependencies:
+    "@firebase/component" "0.1.16"
+    "@firebase/storage-types" "0.3.13"
+    "@firebase/util" "0.2.50"
+    tslib "^1.11.1"
+
+"@firebase/testing@0.20.8":
+  version "0.20.8"
+  resolved "https://registry.yarnpkg.com/@firebase/testing/-/testing-0.20.8.tgz#67f600d48ba4e5b1ea11d127fc629bfee683bcd8"
+  integrity sha512-/aB3c8YagexYfyzZnUioNdsWjmNejghN3Gj03B5hqWFj9cnSylr0veOGH71uGShfw968dmCE0T20clEejPQAOQ==
   dependencies:
     "@firebase/logger" "0.2.6"
     "@firebase/util" "0.2.50"
-    firebase "7.16.1"
+    firebase "7.17.0"
     request "2.88.2"
 
 "@firebase/util@0.2.50":
@@ -5219,6 +5241,26 @@ firebase@7.16.1:
     "@firebase/polyfill" "0.3.36"
     "@firebase/remote-config" "0.1.25"
     "@firebase/storage" "0.3.39"
+    "@firebase/util" "0.2.50"
+
+firebase@7.17.0:
+  version "7.17.0"
+  resolved "https://registry.yarnpkg.com/firebase/-/firebase-7.17.0.tgz#85dcd7c85d6dbcba7740dd5920a7f56bf8177e12"
+  integrity sha512-+y7c1pCj8xp98CIDhVjg0rKhGtsFskGB8hyhjsyp549Upwa0cropdK5emCFTmMIbvDjZmP8rTuuDXPBeREAaCg==
+  dependencies:
+    "@firebase/analytics" "0.4.0"
+    "@firebase/app" "0.6.8"
+    "@firebase/app-types" "0.6.1"
+    "@firebase/auth" "0.14.9"
+    "@firebase/database" "0.6.8"
+    "@firebase/firestore" "1.16.1"
+    "@firebase/functions" "0.4.48"
+    "@firebase/installations" "0.4.14"
+    "@firebase/messaging" "0.6.20"
+    "@firebase/performance" "0.3.9"
+    "@firebase/polyfill" "0.3.36"
+    "@firebase/remote-config" "0.1.25"
+    "@firebase/storage" "0.3.40"
     "@firebase/util" "0.2.50"
 
 firebaseui@^4.1.0:
