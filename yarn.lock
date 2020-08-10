@@ -1550,10 +1550,10 @@
   resolved "https://registry.yarnpkg.com/@firebase/webchannel-wrapper/-/webchannel-wrapper-0.3.0.tgz#d1689566b94c25423d1fb2cb031c5c2ea4c9f939"
   integrity sha512-VniCGPIgSGNEgOkh5phb3iKmSGIzcwrccy3IomMFRWPCMiCk2y98UQNJEoDs1yIHtZMstVjYWKYxnunIGzC5UQ==
 
-"@google-cloud/functions-framework@1.7.0":
-  version "1.7.0"
-  resolved "https://registry.yarnpkg.com/@google-cloud/functions-framework/-/functions-framework-1.7.0.tgz#a3eecc950907d6bea1bc5e01886aa29d5dcc6c90"
-  integrity sha512-aIccMyME6x1PCdTc3op9xm3UVhf8mi7e3NDogh8VhaScqsCsYDzRrBn30CWyHn6lqF0IJ/bwrD24X8UmLin3uQ==
+"@google-cloud/functions-framework@1.7.1":
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/@google-cloud/functions-framework/-/functions-framework-1.7.1.tgz#d29a27744a6eb2f95d840b86135b97b0d804a49e"
+  integrity sha512-jjG7nH94Thij97EPW2oQN28pVPRN3UEGcsCRi6RdaaiSyK32X40LN4WHntKVmQPBhqH+I0magHMk1pSb0McH2g==
   dependencies:
     body-parser "^1.18.3"
     express "^4.16.4"
