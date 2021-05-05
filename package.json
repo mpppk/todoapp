@@ -24,7 +24,7 @@
     "@material-ui/styles": "4.11.4",
     "@types/next-redux-saga": "3.0.2",
     "@zeit/next-typescript": "1.1.1",
-    "dotenv": "8.5.1",
+    "dotenv": "8.6.0",
     "es6-promise": "4.2.8",
     "firebase": "7.24.0",
     "isomorphic-unfetch": "3.1.0",
