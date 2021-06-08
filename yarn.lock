@@ -1922,14 +1922,14 @@
   resolved "https://registry.yarnpkg.com/@firebase/webchannel-wrapper/-/webchannel-wrapper-0.4.0.tgz#becce788818d3f47f0ac1a74c3c061ac1dcf4f6d"
   integrity sha512-8cUA/mg0S+BxIZ72TdZRsXKBP5n5uRcE3k29TZhZw6oIiHBt9JA7CTb/4pE1uKtE/q5NeTY2tBDcagoZ+1zjXQ==
 
-"@google-cloud/functions-framework@1.7.1":
-  version "1.7.1"
-  resolved "https://registry.yarnpkg.com/@google-cloud/functions-framework/-/functions-framework-1.7.1.tgz#d29a27744a6eb2f95d840b86135b97b0d804a49e"
-  integrity sha512-jjG7nH94Thij97EPW2oQN28pVPRN3UEGcsCRi6RdaaiSyK32X40LN4WHntKVmQPBhqH+I0magHMk1pSb0McH2g==
+"@google-cloud/functions-framework@1.8.0":
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/@google-cloud/functions-framework/-/functions-framework-1.8.0.tgz#1c4efba59238ed4fb642cd9fdc53d87961091d1b"
+  integrity sha512-NUPVpY+cCm/JLvDyfviKcqSsFAQnwndhYc+OZYyGxaNsJhTG2T/9+3EFd6PAJJJEcRZoCa0lPYodBf/adBq6Zg==
   dependencies:
     body-parser "^1.18.3"
     express "^4.16.4"
-    minimist "^1.2.0"
+    minimist "^1.2.5"
     on-finished "^2.3.0"
 
 "@google-cloud/paginator@^2.0.0":
