@@ -51,7 +51,7 @@
     "@types/lodash": "4.14.171",
     "@types/react": "16.14.11",
     "@types/react-dom": "16.9.14",
-    "@types/react-redux": "7.1.17",
+    "@types/react-redux": "7.1.18",
     "enzyme": "3.11.0",
     "enzyme-adapter-react-16": "1.15.6",
     "firebase-tools": "8.20.0",
