@@ -5751,10 +5751,10 @@ firebase@7.24.0:
     "@firebase/storage" "0.3.43"
     "@firebase/util" "0.3.2"
 
-firebaseui@^4.7.1:
-  version "4.8.0"
-  resolved "https://registry.yarnpkg.com/firebaseui/-/firebaseui-4.8.0.tgz#74c10a30db17f2cbfe020c91b97d5e3c6e8efbbc"
-  integrity sha512-DG8CD+969JHMailhOm8nKo+eJlumIHex0TH18eJeTo0Q2KEt5m/b61S1ky4bavK/nGmLJBRECJytq09/pwhZ0A==
+firebaseui@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/firebaseui/-/firebaseui-6.0.0.tgz#074580e9e7da93ed3d551a869dbab4e0902701d7"
+  integrity sha512-fhzteivWRTnOhSk5JkIVLmcXk6aVh4ZtW+KAnJijeeZhAyM+Ed9m1YgC4l+VK+NOp+kerVw6HL1mRdvDF6Yeuw==
   dependencies:
     dialog-polyfill "^0.4.7"
     material-design-lite "^1.2.0"
@@ -9604,12 +9604,12 @@ react-dom@16.14.0:
     prop-types "^15.6.2"
     scheduler "^0.19.1"
 
-react-firebaseui@4.2.0:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/react-firebaseui/-/react-firebaseui-4.2.0.tgz#13846381daefe31b90af98854f3e79e82d4f81ba"
-  integrity sha512-KRWfQn7iJMMAcB1zmMrpo5PJ7CBrLW6NXvdEJ/N+SFZUs7ANvC3g8LzgYwsBHUr1OR1MQtGosV7dyQSmYtKyOA==
+react-firebaseui@6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/react-firebaseui/-/react-firebaseui-6.0.0.tgz#97a075e7caa2fb969c8ded9efbbcefccb1f33ce1"
+  integrity sha512-VzLMiW7DBZCsW/qpP9nky/pPlAoIjDxA2Qyc+QAPf+RjelIkvPPiCBXR2aAz+Upy+ujrx6pYDXj547DW5uC4ww==
   dependencies:
-    firebaseui "^4.7.1"
+    firebaseui "^6.0.0"
 
 react-is@16.13.1, react-is@^16.13.1:
   version "16.13.1"
