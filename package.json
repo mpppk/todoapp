@@ -19,9 +19,9 @@
   "dependencies": {
     "@babel/plugin-proposal-nullish-coalescing-operator": "7.16.0",
     "@babel/plugin-proposal-optional-chaining": "7.16.0",
-    "@material-ui/core": "4.11.4",
-    "@material-ui/icons": "4.11.2",
-    "@material-ui/styles": "4.11.4",
+    "@material-ui/core": "4.12.4",
+    "@material-ui/icons": "4.11.3",
+    "@material-ui/styles": "4.11.5",
     "@types/next-redux-saga": "3.0.2",
     "@zeit/next-typescript": "1.1.1",
     "dotenv": "8.6.0",
